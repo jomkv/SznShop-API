@@ -22,6 +22,11 @@ const userSchema: Schema = new Schema<IUser>({
     type: String,
     required: false,
   },
+  role: {
+    type: String,
+    default: "user",
+    enum: ["user", "admin"],
+  },
   createdAt: {
     type: Date,
     default: Date.now,
