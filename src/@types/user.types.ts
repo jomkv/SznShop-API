@@ -11,3 +11,8 @@ export interface IUser extends Document {
   role: string;
   createdAt: Date;
 }
+
+export interface IUserToken {
+  userId: string;
+  role: string; // "user" | "admin"
+}
