@@ -53,7 +53,9 @@ const protect = asyncHandler(
     const token = getToken(req, res);
 
     try {
-      req.sznUser = getUserFromToken(token);
+      const user: IUserToken = getUserFromToken(token);
+
+      req.sznUser = user;
 
       next();
     } catch (err) {
@@ -73,21 +75,27 @@ const protect = asyncHandler(
 const adminProtect = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const token = getToken(req, res);
+    let user: IUserToken | null = null;
 
     try {
-      const user = getUserFromToken(token);
-
-      if (user.role !== "admin") {
-        res.status(401);
-        throw new Error("Not authorized, not an admin");
-      }
-
-      req.sznUser = user;
-
-      next();
+      user = getUserFromToken(token);
     } catch (err) {
       handleError(res, err);
     }
+
+    if (!user) {
+      res.status(401);
+      throw new Error("Not authorized, no token provided");
+    }
+
+    if (user.role !== "admin") {
+      res.status(401);
+      throw new Error("Not authorized, not an admin");
+    }
+
+    req.sznUser = user;
+
+    next();
   }
 );
 
