@@ -13,7 +13,23 @@ export interface IProduct extends Document {
   isDeleted: boolean;
 }
 
+export interface ICategory extends Document {
+  _id: string;
+  id?: string;
+  name: string; // unique
+  showInMenu: boolean;
+}
+
+export interface ICategoryProduct extends Document {
+  _id: string;
+  id?: string;
+  productId: Types.ObjectId;
+  categoryId: Types.ObjectId;
+}
+
 export interface IStocks extends Document {
+  _id: string;
+  id?: string;
   productId: Types.ObjectId;
   xs: number;
   sm: number;

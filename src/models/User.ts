@@ -1,6 +1,5 @@
 import { Schema, model } from "mongoose";
 import { IUser } from "../@types/user.types";
-import jwt from "jsonwebtoken";
 
 const userSchema: Schema = new Schema<IUser>({
   googleId: {
