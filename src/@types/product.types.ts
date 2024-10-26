@@ -13,6 +13,13 @@ export interface IProductDocument extends Document {
   isDeleted: boolean;
 }
 
+export interface IProductInput {
+  name: string;
+  description: string;
+  price: number;
+  active?: boolean;
+}
+
 export interface ICategoryDocument extends Document {
   _id: string;
   id?: string;
