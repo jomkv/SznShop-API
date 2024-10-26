@@ -7,9 +7,10 @@ import passport from "passport";
 
 // * Local Imports
 import connectDB from "./config/db";
+import googleStrategy from "./config/googleStrategy";
 import errorHandler from "./middlewares/errorHandler";
 import authRoutes from "./routes/auth.route";
-import googleStrategy from "./config/googleStrategy";
+import productRoutes from "./routes/product.route";
 
 // * Configs
 dotenv.config();
@@ -29,6 +30,7 @@ app.use(passport.initialize());
 
 // * Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/product", productRoutes);
 
 app.all(
   "*",
