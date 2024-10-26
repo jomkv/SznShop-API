@@ -1,7 +1,7 @@
 import mongoose, { Schema, model } from "mongoose";
-import { ICategoryProduct } from "../@types/product.types";
+import { ICategoryProductDocument } from "../@types/product.types";
 
-const categoryProductSchema: Schema = new Schema<ICategoryProduct>({
+const categoryProductSchema: Schema = new Schema<ICategoryProductDocument>({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product",
@@ -12,7 +12,7 @@ const categoryProductSchema: Schema = new Schema<ICategoryProduct>({
   },
 });
 
-const CategoryProduct = model<ICategoryProduct>(
+const CategoryProduct = model<ICategoryProductDocument>(
   "CategoryProduct",
   categoryProductSchema
 );

@@ -1,7 +1,7 @@
 import { Document, Types } from "mongoose";
 import { IImage } from "./image.types";
 
-export interface IProduct extends Document {
+export interface IProductDocument extends Document {
   _id: string;
   id?: string;
   name: string;
@@ -13,21 +13,21 @@ export interface IProduct extends Document {
   isDeleted: boolean;
 }
 
-export interface ICategory extends Document {
+export interface ICategoryDocument extends Document {
   _id: string;
   id?: string;
   name: string; // unique
   showInMenu: boolean;
 }
 
-export interface ICategoryProduct extends Document {
+export interface ICategoryProductDocument extends Document {
   _id: string;
   id?: string;
   productId: Types.ObjectId;
   categoryId: Types.ObjectId;
 }
 
-export interface IStocks extends Document {
+export interface IStocksDocument extends Document {
   _id: string;
   id?: string;
   productId: Types.ObjectId;

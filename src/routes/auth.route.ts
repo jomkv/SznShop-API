@@ -2,7 +2,7 @@ import { Router } from "express";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import User from "../models/User";
-import { IUser } from "../@types/user.types";
+import { IUserDocument } from "../@types/user.types";
 import BadRequestError from "../errors/BadRequestError";
 dotenv.config();
 
@@ -46,7 +46,10 @@ router.route("/redirect").get(
   }),
   (req, res) => {
     const token = jwt.sign(
-      { userId: (req.user as IUser)._id, role: (req.user as IUser).role },
+      {
+        userId: (req.user as IUserDocument)._id,
+        role: (req.user as IUserDocument).role,
+      },
       process.env.JWT_SECRET as string,
       { expiresIn: "1h" }
     );

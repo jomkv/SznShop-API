@@ -1,7 +1,7 @@
 import mongoose, { Schema, model } from "mongoose";
-import { IStocks } from "../@types/product.types";
+import { IStocksDocument } from "../@types/product.types";
 
-const stocksSchema: Schema = new Schema<IStocks>({
+const stocksSchema: Schema = new Schema<IStocksDocument>({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product",
@@ -29,6 +29,6 @@ const stocksSchema: Schema = new Schema<IStocks>({
   },
 });
 
-const Stocks = model<IStocks>("Stocks", stocksSchema);
+const Stocks = model<IStocksDocument>("Stocks", stocksSchema);
 
 export default Stocks;
