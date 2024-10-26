@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
-import { IImage } from "../../@types/image.types";
+import { IImageDocument } from "../../@types/image.types";
 
-const imageSchema: Schema = new Schema<IImage>({
+const imageSchema: Schema = new Schema<IImageDocument>({
   url: {
     type: String,
     required: true,
