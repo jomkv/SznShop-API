@@ -45,7 +45,9 @@ const softDeletePlugin = (schema: mongoose.Schema) => {
     this: mongoose.Query<TDocument, any>,
     next: any
   ) {
-    this.where({ isDeleted: false });
+    if (!this.getOptions().includeDeleted) {
+      this.where({ isDeleted: false });
+    }
     next();
   };
 
@@ -53,7 +55,9 @@ const softDeletePlugin = (schema: mongoose.Schema) => {
     this: mongoose.Aggregate<any>,
     next: any
   ) {
-    this.pipeline().unshift({ $match: { isDeleted: false } });
+    if (!this.options.includeDeleted) {
+      this.pipeline().unshift({ $match: { isDeleted: false } });
+    }
     next();
   };
 
