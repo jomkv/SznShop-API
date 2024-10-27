@@ -1,6 +1,6 @@
 import multer from "multer";
 import BadRequestError from "../errors/BadRequestError";
-import { Request } from "express";
+import { Request, Response, NextFunction } from "express";
 
 const storage = multer.memoryStorage();
 
@@ -24,6 +24,18 @@ const upload = multer({
   limits: {
     fileSize: 1024 * 1024 * 10, // 10mb
   },
-});
+}).array("images", 4);
 
-export default upload;
+const uploader = (req: Request, res: Response, next: NextFunction) => {
+  upload(req, res, (err: any) => {
+    if (err instanceof multer.MulterError) {
+      return next(new Error(`Multer Error ${err.message}`));
+    } else if (err) {
+      return next(new Error(err.message));
+    }
+
+    next();
+  });
+};
+
+export default uploader;
