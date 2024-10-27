@@ -64,7 +64,7 @@ const createProduct = asyncHandler(
 
       res
         .status(201)
-        .json({ message: "New croduct created", product: newProduct });
+        .json({ message: "New product created", product: newProduct });
     } catch (error) {
       await session.abortTransaction();
       throw new DatabaseError();
