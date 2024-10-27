@@ -10,7 +10,6 @@ export interface IProductDocument extends Document {
   images: IImage[];
   createdAt: Date;
   active: boolean;
-  isDeleted: boolean;
 }
 
 export interface IProductInput {
