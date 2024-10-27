@@ -1,6 +1,7 @@
 import { Schema, model } from "mongoose";
-import imageSchema from "./schemas/imageSchema";
+import imageSchema from "./schemas/image.schema";
 import { IProductDocument } from "../@types/product.types";
+import { softDeletePlugin } from "./plugins/softDelete.plugin";
 
 const productSchema: Schema = new Schema<IProductDocument>({
   name: {
@@ -23,11 +24,9 @@ const productSchema: Schema = new Schema<IProductDocument>({
     type: Boolean,
     default: true,
   },
-  isDeleted: {
-    type: Boolean,
-    default: false,
-  },
 });
+
+softDeletePlugin(productSchema);
 
 const Product = model<IProductDocument>("Product", productSchema);
 
