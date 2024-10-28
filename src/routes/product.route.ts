@@ -9,12 +9,17 @@ import uploader from "../middlewares/upload.middleware";
 import {
   createProduct,
   getProduct,
+  getProductStocks,
   getProductsHome,
   editProduct,
+  editProductStocks,
   deleteProduct,
 } from "../controllers/product.controller";
 
 const router = Router();
+
+// Centralize validateId middleware for :id parameter
+router.param("id", validateId);
 
 router.route("/").post(adminProtect, uploader, createProduct);
 
@@ -22,8 +27,13 @@ router.route("/home").get(getProductsHome);
 
 router
   .route("/:id")
-  .get(validateId, getProduct)
-  .put(adminProtect, validateId, uploader, editProduct)
-  .delete(adminProtect, validateId, deleteProduct);
+  .get(getProduct)
+  .put(adminProtect, uploader, editProduct)
+  .delete(adminProtect, deleteProduct);
+
+router
+  .route("/:id/stocks")
+  .get(adminProtect, getProductStocks)
+  .put(adminProtect, editProductStocks);
 
 export default router;

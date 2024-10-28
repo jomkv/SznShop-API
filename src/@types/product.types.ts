@@ -43,3 +43,11 @@ export interface IStocksDocument extends Document {
   lg: number;
   xl: number;
 }
+
+export interface IStocksInput {
+  xs: number;
+  sm: number;
+  md: number;
+  lg: number;
+  xl: number;
+}

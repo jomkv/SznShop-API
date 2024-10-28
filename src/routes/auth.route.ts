@@ -51,7 +51,7 @@ router.route("/redirect").get(
         role: (req.user as IUserDocument).role,
       },
       process.env.JWT_SECRET as string,
-      { expiresIn: "1h" }
+      { expiresIn: "15d" }
     );
 
     res.cookie("x-auth-cookie", token);

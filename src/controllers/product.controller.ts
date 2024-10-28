@@ -1,6 +1,11 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import { IProductDocument, IProductInput } from "../@types/product.types";
+import {
+  IProductDocument,
+  IProductInput,
+  IStocksDocument,
+  IStocksInput,
+} from "../@types/product.types";
 import mongoose from "mongoose";
 import { deleteImages, uploadImages } from "../utils/cloudinaryHelper";
 
@@ -20,6 +25,20 @@ const findProductOrError = async (id: string): Promise<IProductDocument> => {
   }
 
   return product;
+};
+
+const findStocksOrError = async (
+  productId: string
+): Promise<IStocksDocument> => {
+  const stocks = await Stocks.findOne({ productId: productId }).populate(
+    "productId"
+  );
+
+  if (!stocks) {
+    throw new BadRequestError("Stocks not found");
+  }
+
+  return stocks;
 };
 
 // @desc    Create Product
@@ -99,10 +118,46 @@ const editProduct = asyncHandler(
     try {
       await product.save();
 
-      res.status(201).json({ message: "Product updated", product });
+      res.status(200).json({ message: "Product updated", product });
     } catch (error) {
       throw new DatabaseError();
     }
+  }
+);
+
+// @desc    Edit product's stocks
+// @route   PUT /api/product/:id/stocks
+// @access  Admin
+const editProductStocks = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const stocks = await findStocksOrError(req.params.id);
+    const { xs, sm, md, lg, xl }: IStocksInput = req.body;
+
+    // If new images uploaded, replace existing images
+    stocks.xs = xs;
+    stocks.sm = sm;
+    stocks.md = md;
+    stocks.lg = lg;
+    stocks.xl = xl;
+
+    try {
+      await stocks.save();
+
+      res.status(200).json({ message: "Product stocks updated", stocks });
+    } catch (error) {
+      throw new DatabaseError();
+    }
+  }
+);
+
+// @desc    Get Products Stocks
+// @route   GET /api/product/:id/stocks
+// @access  Admin
+const getProductStocks = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const stocks = await findStocksOrError(req.params.id);
+
+    res.status(200).json({ message: "Product stocks fetched", stocks });
   }
 );
 
@@ -113,13 +168,21 @@ const deleteProduct = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const product = await findProductOrError(req.params.id);
 
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
       const productImages = product.images;
+
+      await product.deleteOne({ session });
+      await Stocks.deleteOne({ productId: product._id }, { session });
+      await session.commitTransaction();
+
       await deleteImages(productImages);
-      await product.deleteOne();
 
       res.status(200).json({ message: "Product deleted", product });
     } catch (error) {
+      await session.abortTransaction();
       throw new DatabaseError();
     }
   }
@@ -151,6 +214,8 @@ export {
   createProduct,
   getProductsHome,
   getProduct,
+  getProductStocks,
   editProduct,
+  editProductStocks,
   deleteProduct,
 };
