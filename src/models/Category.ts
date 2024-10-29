@@ -8,7 +8,7 @@ const categorySchema: Schema = new Schema<ICategoryDocument>({
   },
   showInMenu: {
     type: Boolean,
-    default: true,
+    default: false,
   },
 });
 
