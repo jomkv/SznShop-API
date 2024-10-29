@@ -1,13 +1,9 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import {
-  IProductDocument,
-  IProductInput,
-  IStocksDocument,
-  IStocksInput,
-} from "../@types/product.types";
+import { IProductInput, IStocksInput } from "../@types/product.types";
 import mongoose from "mongoose";
 import { deleteImages, uploadImages } from "../utils/cloudinaryHelper";
+import { findProductOrError, findStocksOrError } from "../utils/findOrError";
 
 // * Models
 import Product from "../models/Product";
@@ -16,30 +12,6 @@ import Stocks from "../models/Stocks";
 // * Custom Errors
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
-
-const findProductOrError = async (id: string): Promise<IProductDocument> => {
-  const product = await Product.findById(id);
-
-  if (!product) {
-    throw new BadRequestError("Product not found");
-  }
-
-  return product;
-};
-
-const findStocksOrError = async (
-  productId: string
-): Promise<IStocksDocument> => {
-  const stocks = await Stocks.findOne({ productId: productId }).populate(
-    "productId"
-  );
-
-  if (!stocks) {
-    throw new BadRequestError("Stocks not found");
-  }
-
-  return stocks;
-};
 
 // @desc    Create Product
 // @route   POST /api/product
@@ -57,7 +29,7 @@ const createProduct = asyncHandler(
       throw new BadRequestError("No image(s) uploaded");
     }
 
-    active = active ? active : true; // default to true if active not given
+    active = typeof active !== "undefined" ? active : true; // default to true if active not given
     const images = await uploadImages(files);
 
     const newProduct = new Product({
