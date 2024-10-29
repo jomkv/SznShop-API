@@ -26,6 +26,11 @@ export interface ICategoryDocument extends Document {
   showInMenu: boolean;
 }
 
+export interface ICategoryInput {
+  name: string;
+  showInMenu?: boolean;
+}
+
 export interface ICategoryProductDocument extends Document {
   _id: string;
   id?: string;

@@ -2,7 +2,7 @@ import { Router } from "express";
 
 // * Middlewares
 import { adminProtect } from "../middlewares/auth.middleware";
-import validateId from "../middlewares/objectId.middleware";
+import checkParamIds from "../middlewares/objectId.middleware";
 import uploader from "../middlewares/upload.middleware";
 
 // * Controllers
@@ -18,22 +18,19 @@ import {
 
 const router = Router();
 
-// Centralize validateId middleware for :id parameter
-router.param("id", validateId);
-
 router.route("/").post(adminProtect, uploader, createProduct);
 
 router.route("/home").get(getProductsHome);
 
 router
   .route("/:id")
-  .get(getProduct)
-  .put(adminProtect, uploader, editProduct)
-  .delete(adminProtect, deleteProduct);
+  .get(checkParamIds, getProduct)
+  .put(adminProtect, checkParamIds, uploader, editProduct)
+  .delete(adminProtect, checkParamIds, deleteProduct);
 
 router
   .route("/:id/stocks")
-  .get(adminProtect, getProductStocks)
-  .put(adminProtect, editProductStocks);
+  .get(adminProtect, checkParamIds, getProductStocks)
+  .put(adminProtect, checkParamIds, editProductStocks);
 
 export default router;

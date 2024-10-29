@@ -11,6 +11,7 @@ import googleStrategy from "./config/googleStrategy";
 import errorHandler from "./middlewares/errorHandler";
 import authRoutes from "./routes/auth.route";
 import productRoutes from "./routes/product.route";
+import categoryRoutes from "./routes/category.route";
 
 // * Configs
 dotenv.config();
@@ -31,6 +32,7 @@ app.use(passport.initialize());
 // * Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
+app.use("/api/category", categoryRoutes);
 
 app.all(
   "*",
