@@ -122,17 +122,6 @@ const editProductStocks = asyncHandler(
   }
 );
 
-// @desc    Get Products Stocks
-// @route   GET /api/product/:id/stocks
-// @access  Admin
-const getProductStocks = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const stocks = await findStocksOrError(req.params.id);
-
-    res.status(200).json({ message: "Product stocks fetched", stocks });
-  }
-);
-
 // @desc    Soft delete a product (not restoreable)
 // @route   DELETE /api/product/:id
 // @access  Admin
@@ -160,6 +149,52 @@ const deleteProduct = asyncHandler(
   }
 );
 
+// @desc    Inverts product status from inactive to active and vice versa
+// @route   POST /api/product/:id/status
+// @access  Admin
+const changeProductStatus = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const product = await findProductOrError(req.params.id);
+
+    product.active = !product.active;
+
+    try {
+      await product.save();
+
+      res.status(200).json({ message: "Product status changed", product });
+    } catch (error) {
+      throw new DatabaseError();
+    }
+  }
+);
+
+// @desc    Get Products Stocks
+// @route   GET /api/product/:id/stocks
+// @access  Admin
+const getProductStocks = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const stocks = await findStocksOrError(req.params.id);
+
+    res.status(200).json({ message: "Product stocks fetched", stocks });
+  }
+);
+
+// @desc    Get all products for admin products page
+// @route   GET /api/product/all
+// @access  Admin
+const getAllProducts = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const active = await Product.find({ active: true });
+    const inactive = await Product.find({ active: false });
+
+    res.status(200).json({
+      message: "All products fetched",
+      activeProducts: active,
+      inactiveProducts: inactive,
+    });
+  }
+);
+
 // @desc    Get Products for Home page
 // @route   GET /api/product/home
 // @access  User & Admin
@@ -184,10 +219,12 @@ const getProduct = asyncHandler(
 
 export {
   createProduct,
+  getAllProducts,
   getProductsHome,
   getProduct,
   getProductStocks,
   editProduct,
   editProductStocks,
   deleteProduct,
+  changeProductStatus,
 };

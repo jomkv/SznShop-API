@@ -8,18 +8,21 @@ import uploader from "../middlewares/upload.middleware";
 // * Controllers
 import {
   createProduct,
+  getAllProducts,
   getProduct,
   getProductStocks,
   getProductsHome,
   editProduct,
   editProductStocks,
   deleteProduct,
+  changeProductStatus,
 } from "../controllers/product.controller";
 
 const router = Router();
 
 router.route("/").post(adminProtect, uploader, createProduct);
 
+router.route("/all").get(adminProtect, getAllProducts);
 router.route("/home").get(getProductsHome);
 
 router
@@ -32,5 +35,9 @@ router
   .route("/:id/stocks")
   .get(adminProtect, checkParamIds, getProductStocks)
   .put(adminProtect, checkParamIds, editProductStocks);
+
+router
+  .route("/:id/status")
+  .post(adminProtect, checkParamIds, changeProductStatus);
 
 export default router;
