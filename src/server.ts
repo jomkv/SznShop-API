@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import asyncHandler from "express-async-handler";
 import passport from "passport";
+import cors from "cors";
 
 // * Local Imports
 import connectDB from "./config/db";
@@ -21,6 +22,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // * Middlewares
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.urlencoded({ extended: false })); // allow destructuring of req.body
 app.use(express.json());
 app.use(cookieParser());
