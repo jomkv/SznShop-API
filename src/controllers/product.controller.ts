@@ -1,6 +1,10 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import { IProductInput, IStocksInput } from "../@types/product.types";
+import {
+  IProductDocument,
+  IProductInput,
+  IStocksInput,
+} from "../@types/product.types";
 import mongoose from "mongoose";
 import { deleteImages, uploadImages } from "../utils/cloudinaryHelper";
 import { findProductOrError, findStocksOrError } from "../utils/findOrError";
@@ -184,13 +188,23 @@ const getProductStocks = asyncHandler(
 // @access  Admin
 const getAllProducts = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const active = await Product.find({ active: true });
-    const inactive = await Product.find({ active: false });
+    const filter = req.query.filter as string | undefined;
+
+    let result: { active?: IProductDocument[]; inactive?: IProductDocument[] } =
+      {};
+
+    if (filter === "active") {
+      result.active = await Product.find({ active: true });
+    } else if (filter === "inactive") {
+      result.inactive = await Product.find({ active: false });
+    } else {
+      result.active = await Product.find({ active: true });
+      result.inactive = await Product.find({ active: false });
+    }
 
     res.status(200).json({
       message: "All products fetched",
-      activeProducts: active,
-      inactiveProducts: inactive,
+      ...result,
     });
   }
 );
