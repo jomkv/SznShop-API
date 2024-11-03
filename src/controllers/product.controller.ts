@@ -118,11 +118,11 @@ const editProductStocks = asyncHandler(
     const { xs, sm, md, lg, xl }: IStocksInput = req.body;
 
     // If new images uploaded, replace existing images
-    stocks.xs = xs;
-    stocks.sm = sm;
-    stocks.md = md;
-    stocks.lg = lg;
-    stocks.xl = xl;
+    stocks.xs = xs !== undefined ? xs : stocks.xs;
+    stocks.sm = sm !== undefined ? sm : stocks.sm;
+    stocks.md = md !== undefined ? md : stocks.md;
+    stocks.lg = lg !== undefined ? lg : stocks.lg;
+    stocks.xl = xl !== undefined ? xl : stocks.xl;
 
     try {
       await stocks.save();

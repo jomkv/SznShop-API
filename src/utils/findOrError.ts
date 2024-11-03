@@ -35,9 +35,7 @@ export const findProductOrError = async (
 export const findStocksOrError = async (
   productId: string
 ): Promise<IStocksDocument> => {
-  const stocks = await Stocks.findOne({ productId: productId }).populate(
-    "productId"
-  );
+  const stocks = await Stocks.findOne({ productId: productId });
 
   if (!stocks) {
     throw new BadRequestError("Stocks not found");
