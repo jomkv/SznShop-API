@@ -8,6 +8,7 @@ import {
 import mongoose from "mongoose";
 import { deleteImages, uploadImages } from "../utils/cloudinaryHelper";
 import { findProductOrError, findStocksOrError } from "../utils/findOrError";
+import { IImage } from "../@types/image.types";
 
 // * Models
 import Product from "../models/Product";
@@ -75,14 +76,17 @@ const editProduct = asyncHandler(
     const product = await findProductOrError(req.params.id);
     let { name, description, price, active }: IProductInput = req.body;
     const files = req.files as Express.Multer.File[] | undefined;
+    const isImageChanged = req.body.isImageChange === "true";
 
     active = active ? active : true; // default to true if active not given
 
+    // save old images to delete for later
+    const oldImages: IImage[] = product.images;
+
     // If new images uploaded, replace existing images
-    let images = product.images;
-    if (files && files.length > 0) {
+    let images: IImage[] = [...oldImages];
+    if (files && files.length > 0 && isImageChanged) {
       images = await uploadImages(files);
-      await deleteImages(product.images);
     }
 
     product.name = name;
@@ -93,6 +97,10 @@ const editProduct = asyncHandler(
 
     try {
       await product.save();
+
+      if (files && files.length > 0 && isImageChanged) {
+        await deleteImages(oldImages);
+      }
 
       res.status(200).json({ message: "Product updated", product });
     } catch (error) {
