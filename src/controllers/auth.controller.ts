@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
 import { IUserDocument, IUserToken } from "../@types/user.types";
+import dotenv from "dotenv";
+dotenv.config();
 
 // * Models
 import User from "../models/User";
@@ -31,6 +33,19 @@ const loginDev = asyncHandler(
   }
 );
 
+// @desc    Logout of account, clear cookies
+// @route   POST /api/auth/logout
+// @access  Public
+const logout = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    res.cookie("x-auth-cookie", "", {
+      expires: new Date(0),
+    });
+
+    res.status(200).json({ message: "Logged out successfully" });
+  }
+);
+
 // @desc    Redirect user after login with auth cookie
 // @route   POST /api/auth/redirect
 // @access  Public
@@ -44,14 +59,20 @@ const handleRedirect = asyncHandler(
         role: user.role,
       },
       process.env.JWT_SECRET as string,
-      { expiresIn: "15d" }
+      {
+        expiresIn: "15d",
+      }
     );
 
     const clientUrl = process.env.CLIENT_URL as string;
     const redirectUrl =
       user.role === "admin" ? `${clientUrl}/admin` : clientUrl;
 
-    res.cookie("x-auth-cookie", token);
+    res.cookie("x-auth-cookie", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
     res.redirect(redirectUrl);
   }
 );
@@ -62,7 +83,7 @@ const handleRedirect = asyncHandler(
 const getMe = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const userToken = req.sznUser as IUserToken;
-    const user = await User.findById(userToken.userId);
+    const user: IUserDocument | null = await User.findById(userToken.userId);
 
     if (!user) {
       res.status(404);
@@ -73,4 +94,4 @@ const getMe = asyncHandler(
   }
 );
 
-export { loginDev, handleRedirect, getMe };
+export { loginDev, handleRedirect, getMe, logout };

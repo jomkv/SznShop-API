@@ -5,7 +5,12 @@ import passport from "passport";
 import { protect } from "../middlewares/auth.middleware";
 
 // * Controllers
-import { loginDev, handleRedirect, getMe } from "../controllers/authController";
+import {
+  loginDev,
+  logout,
+  handleRedirect,
+  getMe,
+} from "../controllers/auth.controller";
 
 const router = Router();
 
@@ -14,6 +19,8 @@ router.route("/login").get(
     scope: ["profile", "email"],
   })
 );
+
+router.route("/logout").post(logout);
 
 if (process.env.NODE_ENV === "development") {
   router.route("/login-dev").post(loginDev);
