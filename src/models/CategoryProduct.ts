@@ -25,7 +25,10 @@ categoryProductSchema.virtual("product", {
 
 // pre hook to populate
 categoryProductSchema.pre(["find", "findOne"], function (next) {
-  this.populate({ path: "product" });
+  if (!this.getOptions().excludeProduct) {
+    this.populate({ path: "product" });
+  }
+
   next();
 });
 

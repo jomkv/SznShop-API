@@ -53,11 +53,17 @@ const getAllCategories = asyncHandler(
 const getCategoryProducts = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const category = await findCategoryOrError(req.params.id);
-    const products = await CategoryProduct.find({ categoryId: category._id });
+    const categoryProducts = await CategoryProduct.find({
+      categoryId: category._id,
+    }).setOptions({ excludeProduct: true });
 
     res
       .status(200)
-      .json({ message: "Category products fetched", category, products });
+      .json({
+        message: "Category products fetched",
+        category,
+        categoryProducts,
+      });
   }
 );
 
