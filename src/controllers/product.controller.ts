@@ -198,16 +198,22 @@ const getAllProducts = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const filter = req.query.filter as string | undefined;
 
-    let result: { active?: IProductDocument[]; inactive?: IProductDocument[] } =
-      {};
+    let result: {
+      active?: IProductDocument[];
+      inactive?: IProductDocument[];
+      all: IProductDocument[];
+    } = { all: [] };
 
     if (filter === "active") {
       result.active = await Product.find({ active: true });
+      result.all = [...result.active];
     } else if (filter === "inactive") {
       result.inactive = await Product.find({ active: false });
+      result.all = [...result.inactive];
     } else {
       result.active = await Product.find({ active: true });
       result.inactive = await Product.find({ active: false });
+      result.all = [...result.active, ...result.inactive];
     }
 
     res.status(200).json({
