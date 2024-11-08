@@ -10,6 +10,7 @@ import {
   getCategoryProducts,
   getAllCategories,
   addRemoveCategoryProduct,
+  editCategoryProducts,
 } from "../controllers/category.controller";
 
 const router = Router();
@@ -19,7 +20,10 @@ router
   .get(adminProtect, getAllCategories)
   .post(adminProtect, createCategory);
 
-router.route("/:id").get(checkParamIds, getCategoryProducts);
+router
+  .route("/:id")
+  .get(checkParamIds, getCategoryProducts)
+  .put(adminProtect, checkParamIds, editCategoryProducts);
 
 router
   .route("/:categoryId/:productId")
