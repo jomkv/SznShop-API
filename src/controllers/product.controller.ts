@@ -17,6 +17,7 @@ import Stocks from "../models/Stocks";
 // * Custom Errors
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
+import CategoryProduct from "../models/CategoryProduct";
 
 // @desc    Create Product
 // @route   POST /api/product
@@ -149,6 +150,7 @@ const deleteProduct = asyncHandler(
 
       await product.deleteOne({ session });
       await Stocks.deleteOne({ productId: product._id }, { session });
+      await CategoryProduct.deleteMany({ productId: product._id }, { session });
       await session.commitTransaction();
 
       await deleteImages(productImages);
