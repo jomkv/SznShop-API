@@ -17,7 +17,7 @@ import CategoryProduct from "../models/CategoryProduct";
 // @access  Admin
 const createCategory = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    let { name, showInMenu }: ICategoryInput = req.body;
+    let { name, showInMenu, productIds }: ICategoryInput = req.body;
 
     if (!name) {
       throw new BadRequestError("Incomplete input");
@@ -31,9 +31,29 @@ const createCategory = asyncHandler(
 
     showInMenu = typeof showInMenu !== "undefined" ? showInMenu : false; // default to false if showInMenu not given
 
-    const category = await Category.create({ name, showInMenu });
+    const session = await startSession();
+    session.startTransaction();
 
-    res.status(201).json({ message: "Category created", category });
+    try {
+      const category = new Category({ name, showInMenu });
+
+      if (productIds) {
+        const cps =
+          productIds?.map((cp) => ({
+            productId: cp,
+            categoryId: category._id,
+          })) || [];
+        await CategoryProduct.insertMany(cps, { session });
+      }
+
+      await category.save({ session });
+
+      await session.commitTransaction();
+
+      res.status(201).json({ message: "Category created", category });
+    } catch (error) {
+      throw new DatabaseError();
+    }
   }
 );
 
