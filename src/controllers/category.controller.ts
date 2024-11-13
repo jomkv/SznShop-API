@@ -128,14 +128,24 @@ const addRemoveCategoryProduct = asyncHandler(
 // @desc    Update category productS
 // @route   PUT /api/category/:categoryId
 // @access  Admin
-const editCategoryProducts = asyncHandler(
+const editCategory = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const category = await findCategoryOrError(req.params.id);
 
     const newProductIds: string[] | undefined = req.body.productIds;
+    let newCategoryName: string | undefined = req.body.name;
+    let showInMenu: boolean | undefined = req.body.showInMenu;
 
     if (!newProductIds) {
       throw new BadRequestError("Incomplete input");
+    }
+
+    if (!newCategoryName) {
+      newCategoryName = category.name;
+    }
+
+    if (!showInMenu) {
+      showInMenu = category.showInMenu;
     }
 
     const existingCps: string[] =
@@ -153,12 +163,8 @@ const editCategoryProducts = asyncHandler(
       (ncp) => !existingCps.includes(ncp as string)
     );
 
-    // if no changes made
-    if (removedCps.length <= 0 && addedCps.length <= 0) {
-      return res.status(200).json({
-        message: "No changes made",
-      });
-    }
+    category.name = newCategoryName;
+    category.showInMenu = showInMenu;
 
     const session = await startSession();
     session.startTransaction();
@@ -185,6 +191,8 @@ const editCategoryProducts = asyncHandler(
         await CategoryProduct.insertMany(newCategoryProducts, { session });
       }
 
+      await category.save({ session });
+
       await session.commitTransaction();
 
       res.status(200).json({
@@ -197,10 +205,38 @@ const editCategoryProducts = asyncHandler(
   }
 );
 
+// @desc   Delete a category
+// @route  DELETE /api/category/:id
+// @access Admin
+const deleteCategory = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const category = await findCategoryOrError(req.params.id);
+
+    const session = await startSession();
+    session.startTransaction();
+
+    try {
+      await category.deleteOne({ session });
+      await CategoryProduct.deleteMany(
+        { categoryId: category._id },
+        { session }
+      );
+
+      await session.commitTransaction();
+
+      res.status(200).json({ message: "Category deleted" });
+    } catch (error) {
+      await session.abortTransaction();
+      throw new DatabaseError();
+    }
+  }
+);
+
 export {
   createCategory,
   getAllCategories,
   getCategoryProducts,
   addRemoveCategoryProduct,
-  editCategoryProducts,
+  editCategory,
+  deleteCategory,
 };
