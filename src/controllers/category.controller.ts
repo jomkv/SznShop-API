@@ -125,6 +125,22 @@ const addRemoveCategoryProduct = asyncHandler(
   }
 );
 
+// @desc    Show/Hide Category
+// @route   POST /api/category/show/:id
+// @access  Admin
+const showHideCategory = asyncHandler(async (req: Request, res: Response) => {
+  const category = await findCategoryOrError(req.params.id);
+
+  category.showInMenu = !category.showInMenu;
+
+  await category.save();
+
+  res.status(200).json({
+    message: "Category updated",
+    category,
+  });
+});
+
 // @desc    Update category productS
 // @route   PUT /api/category/:categoryId
 // @access  Admin
@@ -237,6 +253,7 @@ export {
   getAllCategories,
   getCategoryProducts,
   addRemoveCategoryProduct,
+  showHideCategory,
   editCategory,
   deleteCategory,
 };

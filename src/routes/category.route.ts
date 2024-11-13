@@ -10,6 +10,7 @@ import {
   getCategoryProducts,
   getAllCategories,
   addRemoveCategoryProduct,
+  showHideCategory,
   editCategory,
   deleteCategory,
 } from "../controllers/category.controller";
@@ -26,6 +27,8 @@ router
   .get(checkParamIds, getCategoryProducts)
   .put(adminProtect, checkParamIds, editCategory)
   .delete(adminProtect, checkParamIds, deleteCategory);
+
+router.route("/show/:id").post(adminProtect, checkParamIds, showHideCategory);
 
 router
   .route("/:categoryId/:productId")
