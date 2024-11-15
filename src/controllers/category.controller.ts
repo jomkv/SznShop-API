@@ -66,25 +66,27 @@ const createCategory = asyncHandler(
 // @access  Admin
 const getAllCategories = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const categories = await Category.find();
-    const categoryWithProducts = await Promise.all(
-      categories.map(async (category: ICategoryDocument) => ({
-        category: category,
-        products: (
-          await CategoryProduct.find({
-            categoryId: category._id,
-          })
-        ).map((cp: ICategoryProductDocument) => cp.product),
-      }))
-    );
+    const includeProducts: boolean = req.query.includeProducts === "true";
 
-    res
-      .status(200)
-      .json({
-        message: "Categories fetched",
-        categories,
-        categoryWithProducts,
-      });
+    const categories = await Category.find();
+    const categoryWithProducts = includeProducts
+      ? await Promise.all(
+          categories.map(async (category: ICategoryDocument) => ({
+            category: category,
+            products: (
+              await CategoryProduct.find({
+                categoryId: category._id,
+              })
+            ).map((cp: ICategoryProductDocument) => cp.product),
+          }))
+        )
+      : [];
+
+    res.status(200).json({
+      message: "Categories fetched",
+      categories,
+      categoryWithProducts,
+    });
   }
 );
 
