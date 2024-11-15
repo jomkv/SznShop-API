@@ -37,6 +37,7 @@ export interface ICategoryProductDocument extends Document {
   id?: string;
   productId: Types.ObjectId;
   categoryId: Types.ObjectId;
+  product?: IProductDocument;
 }
 
 export interface IStocksDocument extends Document {

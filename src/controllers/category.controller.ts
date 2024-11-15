@@ -1,6 +1,10 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import { ICategoryInput } from "../@types/product.types";
+import {
+  ICategoryDocument,
+  ICategoryInput,
+  ICategoryProductDocument,
+} from "../@types/product.types";
 import { findCategoryOrError } from "../utils/findOrError";
 import { startSession } from "mongoose";
 
@@ -63,8 +67,24 @@ const createCategory = asyncHandler(
 const getAllCategories = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const categories = await Category.find();
+    const categoryWithProducts = await Promise.all(
+      categories.map(async (category: ICategoryDocument) => ({
+        category: category,
+        products: (
+          await CategoryProduct.find({
+            categoryId: category._id,
+          })
+        ).map((cp: ICategoryProductDocument) => cp.product),
+      }))
+    );
 
-    res.status(200).json({ message: "Categories fetched", categories });
+    res
+      .status(200)
+      .json({
+        message: "Categories fetched",
+        categories,
+        categoryWithProducts,
+      });
   }
 );
 
@@ -76,7 +96,7 @@ const getCategoryProducts = asyncHandler(
     const category = await findCategoryOrError(req.params.id);
     const categoryProducts = await CategoryProduct.find({
       categoryId: category._id,
-    }).setOptions({ excludeProduct: true });
+    }).setOptions({ excludeProduct: false });
     const productIds = categoryProducts.map((cp) => cp.productId);
 
     res.status(200).json({
