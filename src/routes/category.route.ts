@@ -9,6 +9,7 @@ import {
   createCategory,
   getCategoryProducts,
   getAllCategories,
+  getCategoriesHome,
   addRemoveCategoryProduct,
   showHideCategory,
   editCategory,
@@ -21,6 +22,8 @@ router
   .route("/")
   .get(adminProtect, getAllCategories)
   .post(adminProtect, createCategory);
+
+router.route("/home").get(getCategoriesHome);
 
 router
   .route("/:id")

@@ -66,24 +66,34 @@ const createCategory = asyncHandler(
 // @access  Admin
 const getAllCategories = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const includeProducts: boolean = req.query.includeProducts === "true";
-
     const categories = await Category.find();
-    const categoryWithProducts = includeProducts
-      ? await Promise.all(
-          categories.map(async (category: ICategoryDocument) => ({
-            category: category,
-            products: (
-              await CategoryProduct.find({
-                categoryId: category._id,
-              })
-            ).map((cp: ICategoryProductDocument) => cp.product),
-          }))
-        )
-      : [];
 
     res.status(200).json({
       message: "Categories fetched",
+      categories,
+    });
+  }
+);
+
+// @desc Get categories with products for home page
+// @route GET /api/category/home
+// @access User & Admin
+const getCategoriesHome = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const categories = await Category.find();
+    const categoryWithProducts = await Promise.all(
+      categories.map(async (category: ICategoryDocument) => ({
+        category: category,
+        products: (
+          await CategoryProduct.find({
+            categoryId: category._id,
+          })
+        ).map((cp: ICategoryProductDocument) => cp.product),
+      }))
+    );
+
+    res.status(200).json({
+      message: "Categories with products fetched",
       categories,
       categoryWithProducts,
     });
@@ -274,6 +284,7 @@ export {
   createCategory,
   getAllCategories,
   getCategoryProducts,
+  getCategoriesHome,
   addRemoveCategoryProduct,
   showHideCategory,
   editCategory,
