@@ -80,7 +80,7 @@ const getAllCategories = asyncHandler(
 // @access User & Admin
 const getCategoriesHome = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const categories = await Category.find();
+    const categories = await Category.find({ showInMenu: true });
     const categoryWithProducts = await Promise.all(
       categories.map(async (category: ICategoryDocument) => ({
         category: category,
