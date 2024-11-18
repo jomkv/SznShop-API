@@ -15,12 +15,12 @@ import DatabaseError from "../errors/DatabaseError";
 const allowedSizes: Size[] = ["xs", "sm", "md", "lg", "xl"];
 
 // @desc    Add product to cart
-// @route   GET /api/cart/:id
+// @route   POST /api/cart/:id
 // @access  Private
 const addToCart = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const product: IProductDocument = await findProductOrError(req.params.id);
-    const quantity: number = req.body.quantity || 1;
+    const quantity: number = Number(req.body.quantity) || 1;
     const size: Size = req.body.size;
 
     if (!allowedSizes.includes(size)) {
@@ -59,4 +59,17 @@ const addToCart = asyncHandler(
   }
 );
 
-export { addToCart };
+// @desc    Get all cart products
+// @route   GET /api/cart
+// @access  Private
+const getCart = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const cartProducts = await CartProduct.find({
+      userId: req.sznUser?.userId,
+    }).populate("productId");
+
+    res.status(200).json({ message: "Cart fetched", cartProducts });
+  }
+);
+
+export { addToCart, getCart };
