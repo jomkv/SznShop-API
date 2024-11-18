@@ -13,6 +13,7 @@ import errorHandler from "./middlewares/errorHandler";
 import authRoutes from "./routes/auth.route";
 import productRoutes from "./routes/product.route";
 import categoryRoutes from "./routes/category.route";
+import cartRoutes from "./routes/cart.route";
 
 // * Configs
 dotenv.config();
@@ -35,6 +36,7 @@ app.use(passport.initialize());
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/category", categoryRoutes);
+app.use("/api/cart", cartRoutes);
 
 app.all(
   "*",

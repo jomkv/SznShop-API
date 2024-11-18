@@ -1,6 +1,8 @@
 import { Document, Types } from "mongoose";
 import { IImage } from "./image.types";
 
+export type Size = "xs" | "sm" | "md" | "lg" | "xl";
+
 export interface IProductDocument extends Document {
   _id: string;
   id?: string;
@@ -10,6 +12,7 @@ export interface IProductDocument extends Document {
   images: IImage[];
   createdAt: Date;
   active: boolean;
+  stocks: IStocksDocument;
 }
 
 export interface IProductInput {
