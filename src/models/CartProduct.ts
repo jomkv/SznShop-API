@@ -6,10 +6,12 @@ const cartProductSchema: Schema = new Schema<ICartProduct>(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref: "User",
     },
     productId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref: "Product",
     },
     quantity: {
       type: Number,
