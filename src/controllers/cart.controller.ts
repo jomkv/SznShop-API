@@ -14,7 +14,7 @@ import DatabaseError from "../errors/DatabaseError";
 
 const allowedSizes: Size[] = ["xs", "sm", "md", "lg", "xl"];
 
-// @desc    Add product to cart
+// @desc    Add product to cart, or update quantity
 // @route   POST /api/cart/:id
 // @access  Private
 const addToCart = asyncHandler(
@@ -33,8 +33,23 @@ const addToCart = asyncHandler(
       size: size,
     });
 
-    if (cartProduct && cartProduct.quantity + quantity > product.stocks[size]) {
-      throw new BadRequestError("Not enough stocks");
+    if (!cartProduct && quantity <= 0) {
+      throw new BadRequestError("Invalid quantity");
+    }
+
+    if (cartProduct) {
+      const totalQuantity = cartProduct.quantity + quantity;
+
+      if (totalQuantity > product.stocks[size]) {
+        throw new BadRequestError("Not enough stocks");
+      } else if (totalQuantity <= 0) {
+        try {
+          await cartProduct.deleteOne();
+          return res.status(200).json({ message: "Product removed from cart" });
+        } catch (error) {
+          throw new DatabaseError();
+        }
+      }
     } else if (quantity > product.stocks[size]) {
       throw new BadRequestError("Not enough stocks");
     }
