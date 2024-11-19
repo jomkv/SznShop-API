@@ -116,7 +116,7 @@ const editProduct = asyncHandler(
 const editProductStocks = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const stocks = await findStocksOrError(req.params.id);
-    const { xs, sm, md, lg, xl }: IStocksInput = req.body;
+    const { xs, sm, md, lg, xl, xxl }: IStocksInput = req.body;
 
     // If new images uploaded, replace existing images
     stocks.xs = xs !== undefined ? xs : stocks.xs;
@@ -124,6 +124,7 @@ const editProductStocks = asyncHandler(
     stocks.md = md !== undefined ? md : stocks.md;
     stocks.lg = lg !== undefined ? lg : stocks.lg;
     stocks.xl = xl !== undefined ? xl : stocks.xl;
+    stocks.xxl = xxl !== undefined ? xxl : stocks.xxl;
 
     try {
       await stocks.save();

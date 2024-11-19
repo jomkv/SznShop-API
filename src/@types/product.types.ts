@@ -1,7 +1,7 @@
 import { Document, Types } from "mongoose";
 import { IImage } from "./image.types";
 
-export type Size = "xs" | "sm" | "md" | "lg" | "xl";
+export type Size = "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
 
 export interface IProductDocument extends Document {
   _id: string;
@@ -52,6 +52,7 @@ export interface IStocksDocument extends Document {
   md: number;
   lg: number;
   xl: number;
+  xxl: number;
 }
 
 export interface IStocksInput {
@@ -60,4 +61,5 @@ export interface IStocksInput {
   md: number;
   lg: number;
   xl: number;
+  xxl: number;
 }

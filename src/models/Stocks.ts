@@ -27,6 +27,10 @@ const stocksSchema: Schema = new Schema<IStocksDocument>({
     type: Number,
     default: 0,
   },
+  xxl: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const Stocks = model<IStocksDocument>("Stocks", stocksSchema);

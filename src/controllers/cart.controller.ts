@@ -12,7 +12,7 @@ import BadRequestError from "../errors/BadRequestError";
 import AuthenticationError from "../errors/AuthenticationError";
 import DatabaseError from "../errors/DatabaseError";
 
-const allowedSizes: Size[] = ["xs", "sm", "md", "lg", "xl"];
+const allowedSizes: Size[] = ["xs", "sm", "md", "lg", "xl", "xxl"];
 
 // @desc    Add product to cart, or update quantity
 // @route   POST /api/cart/:id
