@@ -1,6 +1,6 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
-export interface IAddress {
+export interface IAddressInput {
   firstName: string;
   lastName: string;
   region: string;
@@ -10,6 +10,10 @@ export interface IAddress {
   postalCode: string;
   addressLabel: string;
   phoneNumber: string;
+}
+
+export interface IAddress extends IAddressInput {
+  userId: Types.ObjectId;
 }
 
 export interface IAddressDocument extends IAddress, Document {}
