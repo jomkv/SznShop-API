@@ -8,10 +8,16 @@ import checkParamIds from "../middlewares/objectId.middleware";
 import {
   createAddress,
   getMyAddresses,
+  deleteAddress,
+  editAddress,
 } from "../controllers/address.controller";
 
 const router = Router();
 
 router.route("/").get(protect, getMyAddresses).post(protect, createAddress);
+router
+  .route("/:id")
+  .put(protect, checkParamIds, editAddress)
+  .delete(protect, checkParamIds, deleteAddress);
 
 export default router;

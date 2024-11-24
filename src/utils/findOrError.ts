@@ -1,3 +1,4 @@
+import { IAddressDocument } from "../@types/address.types";
 import {
   ICategoryDocument,
   IProductDocument,
@@ -7,6 +8,7 @@ import BadRequestError from "../errors/BadRequestError";
 import Category from "../models/Category";
 import Product from "../models/Product";
 import Stocks from "../models/Stocks";
+import Address from "../models/Address";
 
 export const findCategoryOrError = async (
   categoryId: string
@@ -42,4 +44,16 @@ export const findStocksOrError = async (
   }
 
   return stocks;
+};
+
+export const findAddressOrError = async (
+  id: string
+): Promise<IAddressDocument> => {
+  const address = await Address.findById(id);
+
+  if (!address) {
+    throw new BadRequestError("Address not found");
+  }
+
+  return address;
 };
