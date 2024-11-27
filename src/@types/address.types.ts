@@ -5,7 +5,7 @@ export interface IAddressInput {
   lastName: string;
   region: string;
   province: string;
-  city: string;
+  municipality: string;
   address: string;
   postalCode: string;
   addressLabel: string;

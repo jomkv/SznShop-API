@@ -21,7 +21,7 @@ const createAddress = asyncHandler(
       lastName,
       region,
       province,
-      city,
+      municipality,
       address,
       postalCode,
       addressLabel,
@@ -33,7 +33,7 @@ const createAddress = asyncHandler(
       !lastName ||
       !region ||
       !province ||
-      !city ||
+      !municipality ||
       !address ||
       !postalCode ||
       !addressLabel ||
@@ -48,7 +48,7 @@ const createAddress = asyncHandler(
       lastName,
       region,
       province,
-      city,
+      municipality,
       address,
       postalCode,
       addressLabel,
@@ -109,7 +109,7 @@ const editAddress = asyncHandler(
       lastName,
       region,
       province,
-      city,
+      municipality,
       address,
       postalCode,
       addressLabel,
@@ -129,7 +129,7 @@ const editAddress = asyncHandler(
     if (lastName !== undefined) addressDoc.lastName = lastName;
     if (region !== undefined) addressDoc.region = region;
     if (province !== undefined) addressDoc.province = province;
-    if (city !== undefined) addressDoc.city = city;
+    if (municipality !== undefined) addressDoc.municipality = municipality;
     if (address !== undefined) addressDoc.address = address;
     if (postalCode !== undefined) addressDoc.postalCode = postalCode;
     if (addressLabel !== undefined) addressDoc.addressLabel = addressLabel;

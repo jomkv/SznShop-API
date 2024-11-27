@@ -23,7 +23,7 @@ const addressSchema: Schema = new Schema<IAddress>({
     type: String,
     required: true,
   },
-  city: {
+  municipality: {
     type: String,
     required: true,
   },
