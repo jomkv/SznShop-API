@@ -43,6 +43,10 @@ const addressSchema: Schema = new Schema<IAddress>({
     type: String,
     required: true,
   },
+  isDefault: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const Address = model<IAddress>("Address", addressSchema);

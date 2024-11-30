@@ -14,6 +14,7 @@ export interface IAddressInput {
 
 export interface IAddress extends IAddressInput {
   userId: Types.ObjectId;
+  isDefault: boolean;
 }
 
 export interface IAddressDocument extends IAddress, Document {}

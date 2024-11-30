@@ -10,6 +10,7 @@ import BadRequestError from "../errors/BadRequestError";
 import AuthenticationError from "../errors/AuthenticationError";
 import DatabaseError from "../errors/DatabaseError";
 import { findAddressOrError } from "../utils/findOrError";
+import { startSession } from "mongoose";
 
 // @desc    Create a new address
 // @route   POST /api/address
@@ -42,6 +43,12 @@ const createAddress = asyncHandler(
       throw new BadRequestError("Incomplete Input");
     }
 
+    // If user has no default address, set the new address as default
+    const isDefault = !(await Address.exists({
+      userId: req.sznUser?.userId,
+      isDefault: true,
+    }));
+
     const newAddress: IAddressDocument = new Address({
       userId: req.sznUser?.userId,
       firstName,
@@ -53,6 +60,7 @@ const createAddress = asyncHandler(
       postalCode,
       addressLabel,
       phoneNumber,
+      isDefault,
     });
 
     try {
@@ -63,6 +71,23 @@ const createAddress = asyncHandler(
     } catch (error) {
       throw new DatabaseError();
     }
+  }
+);
+
+// @desc    Get specific address
+// @route   GET /api/address/:id
+// @access  Private
+const getAddress = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const address = await findAddressOrError(req.params.id);
+
+    if (address.userId.toString() !== req.sznUser?.userId) {
+      throw new AuthenticationError();
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Address fetched successfully", address });
   }
 );
 
@@ -147,4 +172,48 @@ const editAddress = asyncHandler(
   }
 );
 
-export { createAddress, getMyAddresses, deleteAddress, editAddress };
+// @desc    Set address as default, unset other default address
+// @route   PUT /api/address/:id/set-default
+// @access  Private
+const setDefaultAddress = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const address: IAddressDocument = await findAddressOrError(req.params.id);
+
+    if (address.userId.toString() !== req.sznUser?.userId) {
+      throw new AuthenticationError();
+    }
+
+    address.isDefault = true;
+
+    const session = await startSession();
+    session.startTransaction();
+
+    try {
+      await Address.updateMany(
+        { userId: req.sznUser?.userId, isDefault: true },
+        { isDefault: false },
+        { session }
+      );
+      await address.save({ session });
+
+      await session.commitTransaction();
+
+      res.status(200).json({
+        message: "Address has been set as default",
+        updatedAddress: address,
+      });
+    } catch (error) {
+      await session.abortTransaction();
+      throw new DatabaseError();
+    }
+  }
+);
+
+export {
+  createAddress,
+  getMyAddresses,
+  getAddress,
+  deleteAddress,
+  editAddress,
+  setDefaultAddress,
+};
