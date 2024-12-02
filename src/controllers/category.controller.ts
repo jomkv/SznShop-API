@@ -211,8 +211,11 @@ const editCategory = asyncHandler(
       (ncp) => !existingCps.includes(ncp as string)
     );
 
+    // existing - removed + added
+    const cpCount = existingCps.length - removedCps.length + addedCps.length;
+
     category.name = newCategoryName;
-    category.showInMenu = showInMenu;
+    category.showInMenu = cpCount < 4 ? false : showInMenu;
 
     const session = await startSession();
     session.startTransaction();
