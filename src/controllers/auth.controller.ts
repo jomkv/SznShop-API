@@ -69,7 +69,6 @@ const handleRedirect = asyncHandler(
       user.role === "admin" ? `${clientUrl}/admin` : clientUrl;
 
     res.cookie("x-auth-cookie", token, {
-      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
