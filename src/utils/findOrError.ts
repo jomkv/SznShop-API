@@ -9,6 +9,8 @@ import Category from "../models/Category";
 import Product from "../models/Product";
 import Stocks from "../models/Stocks";
 import Address from "../models/Address";
+import { ICartProductDocument } from "../@types/cart.types";
+import CartProduct from "../models/CartProduct";
 
 export const findCategoryOrError = async (
   categoryId: string
@@ -56,4 +58,16 @@ export const findAddressOrError = async (
   }
 
   return address;
+};
+
+export const findCartItemOrError = async (
+  id: string
+): Promise<ICartProductDocument> => {
+  const cartProduct = await CartProduct.findById(id);
+
+  if (!cartProduct) {
+    throw new BadRequestError("Cart item not found");
+  }
+
+  return cartProduct;
 };

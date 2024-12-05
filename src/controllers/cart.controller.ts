@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { IProductDocument, Size } from "../@types/product.types";
-import { findProductOrError } from "../utils/findOrError";
+import { findCartItemOrError, findProductOrError } from "../utils/findOrError";
 
 // * Models
 import User from "../models/User";
@@ -74,6 +74,26 @@ const addToCart = asyncHandler(
   }
 );
 
+// @desc    Remove a cart item
+// @route   DELETE /api/cart/:id
+// @access  Private
+const removeFromCart = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const cartItem = await findCartItemOrError(req.params.id);
+
+    if (cartItem.userId.toString() !== req.sznUser?.userId) {
+      throw new AuthenticationError();
+    }
+
+    try {
+      await cartItem.deleteOne();
+      return res.status(200).json({ message: "Cart item removed" });
+    } catch (error) {
+      throw new DatabaseError();
+    }
+  }
+);
+
 // @desc    Get all cart products
 // @route   GET /api/cart
 // @access  Private
@@ -87,4 +107,4 @@ const getCart = asyncHandler(
   }
 );
 
-export { addToCart, getCart };
+export { addToCart, getCart, removeFromCart };
