@@ -9,6 +9,8 @@ import {
   addToCart,
   getCart,
   removeFromCart,
+  incrementCartItem,
+  decrementCartItem,
 } from "../controllers/cart.controller";
 
 const router = Router();
@@ -18,5 +20,8 @@ router
   .route("/:id")
   .post(protect, checkParamIds, addToCart)
   .delete(protect, checkParamIds, removeFromCart);
+
+router.route("/:id/increment").post(protect, checkParamIds, incrementCartItem);
+router.route("/:id/decrement").post(protect, checkParamIds, decrementCartItem);
 
 export default router;

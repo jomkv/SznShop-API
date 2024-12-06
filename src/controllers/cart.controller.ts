@@ -74,6 +74,67 @@ const addToCart = asyncHandler(
   }
 );
 
+// @desc    Increment cart item quantity
+// @route   POST /api/cart/:id/increment
+// @access  Private
+const incrementCartItem = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const cartItem = await findCartItemOrError(req.params.id);
+
+    if (cartItem.userId.toString() !== req.sznUser?.userId) {
+      throw new AuthenticationError();
+    }
+
+    const product = await findProductOrError(String(cartItem.productId._id));
+
+    if (cartItem.quantity + 1 > product.stocks[cartItem.size]) {
+      throw new BadRequestError("Not enough stocks");
+    }
+
+    try {
+      cartItem.quantity += 1;
+      await cartItem.save();
+      res
+        .status(200)
+        .json({ message: "Cart item quantity incremented", cartItem });
+    } catch (error) {
+      throw new DatabaseError();
+    }
+  }
+);
+
+// @desc    Decrement cart item quantity
+// @route   POST /api/cart/:id/decrement
+// @access  Private
+const decrementCartItem = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const cartItem = await findCartItemOrError(req.params.id);
+
+    if (cartItem.userId.toString() !== req.sznUser?.userId) {
+      throw new AuthenticationError();
+    }
+
+    if (cartItem.quantity - 1 < 0) {
+      throw new BadRequestError("Unable to decrement quantity");
+    }
+
+    try {
+      if (cartItem.quantity - 1 === 0) {
+        await cartItem.deleteOne();
+        return res.status(200).json({ message: "Cart item removed" });
+      } else {
+        cartItem.quantity -= 1;
+        await cartItem.save();
+        res
+          .status(200)
+          .json({ message: "Cart item quantity incremented", cartItem });
+      }
+    } catch (error) {
+      throw new DatabaseError();
+    }
+  }
+);
+
 // @desc    Remove a cart item
 // @route   DELETE /api/cart/:id
 // @access  Private
@@ -107,4 +168,10 @@ const getCart = asyncHandler(
   }
 );
 
-export { addToCart, getCart, removeFromCart };
+export {
+  addToCart,
+  getCart,
+  removeFromCart,
+  incrementCartItem,
+  decrementCartItem,
+};
