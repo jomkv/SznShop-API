@@ -15,6 +15,7 @@ import productRoutes from "./routes/product.route";
 import categoryRoutes from "./routes/category.route";
 import cartRoutes from "./routes/cart.route";
 import addressRoutes from "./routes/address.route";
+import orderRoutes from "./routes/order.route";
 
 // * Configs
 dotenv.config();
@@ -39,6 +40,7 @@ app.use("/api/product", productRoutes);
 app.use("/api/category", categoryRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/address", addressRoutes);
+app.use("/api/order", orderRoutes);
 
 app.all(
   "*",
