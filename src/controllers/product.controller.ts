@@ -263,8 +263,18 @@ const getProductBuyNow = asyncHandler(
     const size: Size = req.query.size as Size;
     const quantity: number = Number(req.query.quantity) || 1;
 
+    const allowedSizes: Size[] = ["xs", "sm", "md", "lg", "xl"];
+
     if (quantity > product.stocks[size]) {
       throw new BadRequestError("Not enough stocks");
+    }
+
+    if (quantity <= 0) {
+      throw new BadRequestError("Invalid quantity");
+    }
+
+    if (!allowedSizes.includes(size)) {
+      throw new BadRequestError("Invalid size");
     }
 
     res.status(200).json({
