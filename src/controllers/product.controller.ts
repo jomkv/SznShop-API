@@ -4,6 +4,7 @@ import {
   IProductDocument,
   IProductInput,
   IStocksInput,
+  Size,
 } from "../@types/product.types";
 import mongoose from "mongoose";
 import { deleteImages, uploadImages } from "../utils/cloudinaryHelper";
@@ -18,6 +19,7 @@ import Stocks from "../models/Stocks";
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
 import CategoryProduct from "../models/CategoryProduct";
+import CartProduct from "../models/CartProduct";
 
 // @desc    Create Product
 // @route   POST /api/product
@@ -154,6 +156,8 @@ const deleteProduct = asyncHandler(
       await CategoryProduct.deleteMany({ productId: product._id }, { session });
       await session.commitTransaction();
 
+      // TODO: update category products visibility based on product count
+
       await deleteImages(productImages);
 
       res.status(200).json({ message: "Product deleted", product });
@@ -172,6 +176,8 @@ const changeProductStatus = asyncHandler(
     const product = await findProductOrError(req.params.id);
 
     product.active = !product.active;
+
+    // TODO: update category products, toggle show if necessary
 
     try {
       await product.save();
@@ -248,6 +254,51 @@ const getProduct = asyncHandler(
   }
 );
 
+// @desc    Get specific product for checkout
+// @route   GET /api/product/checkout/:id?size=xs&quantity=1
+// @access  User & Admin
+const getProductBuyNow = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const product = await findProductOrError(req.params.id);
+    const size: Size = req.query.size as Size;
+    const quantity: number = Number(req.query.quantity) || 1;
+
+    if (quantity > product.stocks[size]) {
+      throw new BadRequestError("Not enough stocks");
+    }
+
+    res.status(200).json({
+      message: "Product for checkout fetched",
+      products: [
+        {
+          product,
+          size,
+          quantity,
+        },
+      ],
+    });
+  }
+);
+
+// @desc    Get products from cart for checkout
+// @route   GET /api/product/checkout/cart
+// @access  User & Admin
+const getProductsCartCheckout = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const cartProducts = await CartProduct.find({
+      userId: req.sznUser?.userId,
+    }).populate("productId");
+
+    const products = cartProducts.map((cartProduct) => ({
+      product: cartProduct.productId,
+      size: cartProduct.size,
+      quantity: cartProduct.quantity,
+    }));
+
+    res.status(200).json({ message: "Product for checkout fetched", products });
+  }
+);
+
 export {
   createProduct,
   getAllProducts,
@@ -258,4 +309,6 @@ export {
   editProductStocks,
   deleteProduct,
   changeProductStatus,
+  getProductBuyNow,
+  getProductsCartCheckout,
 };
