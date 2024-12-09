@@ -1,23 +1,19 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import {
-  IProductDocument,
-  IProductInput,
-  IStocksInput,
-} from "../@types/product.types";
-import mongoose from "mongoose";
-import { deleteImages, uploadImages } from "../utils/cloudinaryHelper";
-import { findProductOrError, findStocksOrError } from "../utils/findOrError";
-import { IImage } from "../@types/image.types";
+import { startSession } from "mongoose";
+import { findAddressOrError, findProductOrError } from "../utils/findOrError";
+import { Types } from "mongoose";
+import { IOrderProduct, IOrderProductInput } from "../@types/order.types";
+import { IAddressDocument } from "../@types/address.types";
 
 // * Models
-import Product from "../models/Product";
-import Stocks from "../models/Stocks";
+import Order from "../models/Order";
+import OrderProduct from "../models/OrderProduct";
+import CartProduct from "../models/CartProduct";
 
 // * Custom Errors
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
-import CategoryProduct from "../models/CategoryProduct";
 
 // @desc    Get my Orders
 // @route   GET /api/order
@@ -42,7 +38,57 @@ const getAllOrders = asyncHandler(
 // @access  User
 const createOrder = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    // TODO
+    const rawProducts: IOrderProductInput[] = req.body.products;
+    const addressId: string = req.body.address;
+    const isCart: boolean = Boolean(req.body.isCart);
+
+    const address: IAddressDocument = await findAddressOrError(addressId);
+
+    const session = await startSession();
+    session.startTransaction();
+
+    try {
+      // Create order
+      const order = new Order({ address });
+      await order.save({ session });
+
+      // Create order products
+      const orderProducts: IOrderProduct[] = await Promise.all(
+        rawProducts.map(async (product: IOrderProductInput) => {
+          const prod = await findProductOrError(product.productId);
+
+          if (prod.stocks[product.size] < product.quantity) {
+            throw new BadRequestError("Not enough stocks");
+          }
+
+          const payload: IOrderProduct = {
+            ...product,
+            productId: prod._id as unknown as Types.ObjectId,
+            orderId: order._id as Types.ObjectId,
+            name: prod.name,
+            description: prod.description,
+            price: prod.price,
+          };
+
+          return payload;
+        })
+      );
+
+      // Delete cart items if order is from cart
+      if (isCart) {
+        await CartProduct.deleteMany(
+          { userId: req.sznUser?.userId },
+          { session }
+        );
+      }
+
+      await OrderProduct.insertMany(orderProducts, { session });
+      await session.commitTransaction();
+
+      res.status(201).json({ message: "Order created", order, orderProducts });
+    } catch (error) {
+      throw new DatabaseError();
+    }
   }
 );
 

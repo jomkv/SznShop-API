@@ -1,22 +1,8 @@
-import mongoose, { Schema, model } from "mongoose";
+import { Schema, model } from "mongoose";
 import { IOrderDocument } from "../@types/order.types";
 
 const orderSchema: Schema = new Schema<IOrderDocument>(
   {
-    product: {
-      name: {
-        type: String,
-        required: true,
-      },
-      description: {
-        type: String,
-        required: true,
-      },
-      price: {
-        type: Number,
-        required: true,
-      },
-    },
     address: {
       firstName: {
         type: String,
@@ -77,14 +63,6 @@ const orderSchema: Schema = new Schema<IOrderDocument>(
       refundedAt: {
         type: Date,
       },
-    },
-    size: {
-      type: String,
-      required: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
     },
     status: {
       type: String,

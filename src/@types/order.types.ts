@@ -1,6 +1,6 @@
 import { IAddressInput } from "./address.types";
 import { Size } from "./product.types";
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 export type Status =
   | "REVIEWING"
@@ -11,11 +11,23 @@ export type Status =
   | "RETURN"
   | "REFUND";
 
+export interface IOrderProductInput {
+  productId: string;
+  quantity: number;
+  size: Size;
+}
+
 export interface IOrderProduct {
+  orderId: Types.ObjectId;
+  productId: Types.ObjectId;
   name: string;
   description: string;
   price: number;
+  quantity: number;
+  size: Size;
 }
+
+export interface IOrderProductDocument extends IOrderProduct, Document {}
 
 export interface IOrderAddress extends IAddressInput {}
 
@@ -30,11 +42,8 @@ export interface IOrderTimestamps {
 }
 
 export interface IOrder {
-  product: IOrderProduct;
   address: IOrderAddress;
   timestamps: IOrderTimestamps;
-  size: Size;
-  quantity: number;
   status: Status;
 }
 
