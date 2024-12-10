@@ -45,6 +45,7 @@ export interface IOrder {
   address: IOrderAddress;
   timestamps: IOrderTimestamps;
   status: Status;
+  userId: Types.ObjectId;
 }
 
 export interface IOrderDocument extends IOrder, Document {

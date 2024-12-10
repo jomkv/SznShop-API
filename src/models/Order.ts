@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, Types, model } from "mongoose";
 import { IOrderDocument } from "../@types/order.types";
 
 const orderSchema: Schema = new Schema<IOrderDocument>(
@@ -69,9 +69,27 @@ const orderSchema: Schema = new Schema<IOrderDocument>(
       required: true,
       default: "REVIEWING",
     },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true } }
 );
+
+orderSchema.virtual("products", {
+  ref: "OrderProduct",
+  localField: "_id",
+  foreignField: "orderId",
+});
+
+// pre hook to populate
+orderSchema.pre(["find", "findOne"], function (next) {
+  this.populate({ path: "products" });
+  this.populate({ path: "userId", select: "firstName lastName" });
+  next();
+});
 
 const Order = model<IOrderDocument>("Order", orderSchema);
 

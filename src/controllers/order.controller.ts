@@ -29,7 +29,9 @@ const getMyOrders = asyncHandler(
 // @access  Admin
 const getAllOrders = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    // TODO
+    const orders = await Order.find();
+
+    res.status(200).json({ message: "Orders successfully fetched.", orders });
   }
 );
 
@@ -49,7 +51,7 @@ const createOrder = asyncHandler(
 
     try {
       // Create order
-      const order = new Order({ address });
+      const order = new Order({ address, userId: req.sznUser?.userId });
       await order.save({ session });
 
       // Create order products
