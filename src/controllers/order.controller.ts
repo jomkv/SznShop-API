@@ -1,7 +1,11 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import { startSession } from "mongoose";
-import { findAddressOrError, findProductOrError } from "../utils/findOrError";
+import {
+  findAddressOrError,
+  findOrderOrError,
+  findProductOrError,
+} from "../utils/findOrError";
 import { Types } from "mongoose";
 import { IOrderProduct, IOrderProductInput } from "../@types/order.types";
 import { IAddressDocument } from "../@types/address.types";
@@ -94,6 +98,44 @@ const createOrder = asyncHandler(
   }
 );
 
+// @desc    Accept the order
+// @route   PATCH /api/order/:id/accept
+// @access  Admin
+const acceptOrder = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const order = await findOrderOrError(req.params.id);
+
+    order.status = "SHIPPING";
+
+    try {
+      await order.save();
+
+      res.status(200).json({ message: "Order accepted", order });
+    } catch (error) {
+      throw new DatabaseError();
+    }
+  }
+);
+
+// @desc    Reject the order
+// @route   PATCH /api/order/:id/reject
+// @access  Admin
+const rejectOrder = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const order = await findOrderOrError(req.params.id);
+
+    order.status = "CANCELLED";
+
+    try {
+      await order.save();
+
+      res.status(200).json({ message: "Order reject", order });
+    } catch (error) {
+      throw new DatabaseError();
+    }
+  }
+);
+
 // @desc    Cancel the order
 // @route   POST /api/order/:id/cancel
 // @access  User & Admin
@@ -103,4 +145,11 @@ const cancelOrder = asyncHandler(
   }
 );
 
-export { getMyOrders, getAllOrders, createOrder, cancelOrder };
+export {
+  getMyOrders,
+  getAllOrders,
+  createOrder,
+  cancelOrder,
+  acceptOrder,
+  rejectOrder,
+};
