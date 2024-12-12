@@ -74,6 +74,10 @@ const orderSchema: Schema = new Schema<IOrderDocument>(
       ref: "User",
       required: true,
     },
+    shippingFee: {
+      type: Number,
+      default: 100,
+    },
   },
   { timestamps: true, toJSON: { virtuals: true } }
 );

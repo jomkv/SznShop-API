@@ -45,6 +45,7 @@ export interface IOrder {
   address: IOrderAddress;
   timestamps: IOrderTimestamps;
   status: Status;
+  shippingFee: number;
   userId: Types.ObjectId;
 }
 

@@ -5,9 +5,14 @@ import {
   findAddressOrError,
   findOrderOrError,
   findProductOrError,
+  findStocksOrError,
 } from "../utils/findOrError";
 import { Types } from "mongoose";
-import { IOrderProduct, IOrderProductInput } from "../@types/order.types";
+import {
+  IOrderProduct,
+  IOrderProductDocument,
+  IOrderProductInput,
+} from "../@types/order.types";
 import { IAddressDocument } from "../@types/address.types";
 
 // * Models
@@ -18,6 +23,7 @@ import CartProduct from "../models/CartProduct";
 // * Custom Errors
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
+import { IStocksDocument } from "../@types/product.types";
 
 // @desc    Get my Orders
 // @route   GET /api/order
@@ -55,7 +61,13 @@ const createOrder = asyncHandler(
 
     try {
       // Create order
-      const order = new Order({ address, userId: req.sznUser?.userId });
+      const shippingFee = address.province === "Cavite" ? 50 : 100;
+
+      const order = new Order({
+        address,
+        userId: req.sznUser?.userId,
+        shippingFee,
+      });
       await order.save({ session });
 
       // Create order products
@@ -107,11 +119,43 @@ const acceptOrder = asyncHandler(
 
     order.status = "SHIPPING";
 
+    const session = await startSession();
+    session.startTransaction();
+
+    const orderProducts: IOrderProductDocument[] = await OrderProduct.find({
+      orderId: order._id,
+    });
+
+    const stocks: IStocksDocument[] = await Promise.all(
+      orderProducts.map(async (op) => {
+        const stock: IStocksDocument = await findStocksOrError(
+          op.productId as unknown as string
+        );
+
+        return stock;
+      })
+    );
+
     try {
-      await order.save();
+      await order.save({ session });
+
+      for (const op of orderProducts) {
+        const stock = stocks.find(
+          (stock) => stock.productId.toString() === op.productId.toString()
+        );
+
+        if (stock) {
+          stock[op.size] -= op.quantity;
+
+          await stock.save({ session });
+        }
+      }
+
+      await session.commitTransaction();
 
       res.status(200).json({ message: "Order accepted", order });
     } catch (error) {
+      await session.abortTransaction();
       throw new DatabaseError();
     }
   }
