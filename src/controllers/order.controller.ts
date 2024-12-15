@@ -40,8 +40,27 @@ const getMyOrders = asyncHandler(
 const getAllOrders = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const orders = await Order.find();
+    const reviewing = orders.filter((order) => order.status === "REVIEWING");
+    const shipping = orders.filter((order) => order.status === "SHIPPING");
+    const received = orders.filter((order) => order.status === "RECEIVED");
+    const completed = orders.filter((order) => order.status === "COMPLETED");
+    const cancelled = orders.filter((order) => order.status === "CANCELLED");
+    const returned = orders.filter((order) => order.status === "RETURN");
+    const refunded = orders.filter((order) => order.status === "REFUND");
 
-    res.status(200).json({ message: "Orders successfully fetched.", orders });
+    res
+      .status(200)
+      .json({
+        message: "Orders successfully fetched.",
+        all: orders,
+        reviewing,
+        shipping,
+        received,
+        completed,
+        cancelled,
+        returned,
+        refunded,
+      });
   }
 );
 
