@@ -43,11 +43,18 @@ stocksSchema.pre("save", async function (next) {
     const size = cartItem.size as Size;
     const availableStock = stocks[size];
 
+    // If the stock is enough, no need to change anything
+    if (cartItem.quantity <= availableStock) {
+      next();
+      return;
+    }
+
     if (availableStock > 0) {
+      // If the stock is not enough, set the quantity to the available stock
       cartItem.quantity = availableStock;
       await cartItem.save({ session: session || undefined });
     } else {
-      // Delete the cart item if no stock is available
+      // if no stock is available, Delete the cart item
       await cartItem.deleteOne({ session: session || undefined });
     }
   }
