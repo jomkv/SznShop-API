@@ -30,7 +30,28 @@ import { IStocksDocument } from "../@types/product.types";
 // @access  User
 const getMyOrders = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    // TODO
+    const orders = await Order.find({ userId: req.sznUser?.userId });
+    const reviewing = orders.filter((order) => order.status === "REVIEWING");
+    const shipping = orders.filter((order) => order.status === "SHIPPING");
+    const received = orders.filter((order) => order.status === "RECEIVED");
+    const completed = orders.filter((order) => order.status === "COMPLETED");
+    const cancelled = orders.filter((order) => order.status === "CANCELLED");
+    const returned = orders.filter((order) => order.status === "RETURN");
+    const refunded = orders.filter((order) => order.status === "REFUND");
+
+    res
+      .status(200)
+      .json({
+        message: "Orders successfully fetched",
+        all: orders,
+        reviewing,
+        shipping,
+        received,
+        completed,
+        cancelled,
+        returned,
+        refunded,
+      });
   }
 );
 
@@ -48,19 +69,17 @@ const getAllOrders = asyncHandler(
     const returned = orders.filter((order) => order.status === "RETURN");
     const refunded = orders.filter((order) => order.status === "REFUND");
 
-    res
-      .status(200)
-      .json({
-        message: "Orders successfully fetched.",
-        all: orders,
-        reviewing,
-        shipping,
-        received,
-        completed,
-        cancelled,
-        returned,
-        refunded,
-      });
+    res.status(200).json({
+      message: "Orders successfully fetched.",
+      all: orders,
+      reviewing,
+      shipping,
+      received,
+      completed,
+      cancelled,
+      returned,
+      refunded,
+    });
   }
 );
 
