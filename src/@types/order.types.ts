@@ -1,6 +1,7 @@
 import { IAddressInput } from "./address.types";
 import { Size } from "./product.types";
 import { Document, Types } from "mongoose";
+import { IProductDocument } from "./product.types";
 
 export type Status =
   | "REVIEWING"
@@ -19,7 +20,7 @@ export interface IOrderProductInput {
 
 export interface IOrderProduct {
   orderId: Types.ObjectId;
-  productId: Types.ObjectId;
+  productId: Types.ObjectId | IProductDocument;
   name: string;
   description: string;
   price: number;
@@ -51,4 +52,5 @@ export interface IOrder {
 
 export interface IOrderDocument extends IOrder, Document {
   createdAt: Date;
+  orderProducts: IOrderProductDocument[];
 }

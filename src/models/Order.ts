@@ -82,7 +82,7 @@ const orderSchema: Schema = new Schema<IOrderDocument>(
   { timestamps: true, toJSON: { virtuals: true } }
 );
 
-orderSchema.virtual("products", {
+orderSchema.virtual("orderProducts", {
   ref: "OrderProduct",
   localField: "_id",
   foreignField: "orderId",
@@ -90,7 +90,7 @@ orderSchema.virtual("products", {
 
 // pre hook to populate
 orderSchema.pre(["find", "findOne"], function (next) {
-  this.populate({ path: "products" });
+  this.populate({ path: "orderProducts" });
   this.populate({ path: "userId", select: "firstName lastName" });
   next();
 });

@@ -37,6 +37,11 @@ const orderProductSchema: Schema = new Schema<IOrderProductDocument>(
   { timestamps: true }
 );
 
+orderProductSchema.pre(["find", "findOne"], function (next) {
+  this.populate({ path: "productId", select: "name description price images" });
+  next();
+});
+
 const OrderProduct = model<IOrderProductDocument>(
   "OrderProduct",
   orderProductSchema
