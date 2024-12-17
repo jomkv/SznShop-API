@@ -39,19 +39,17 @@ const getMyOrders = asyncHandler(
     const returned = orders.filter((order) => order.status === "RETURN");
     const refunded = orders.filter((order) => order.status === "REFUND");
 
-    res
-      .status(200)
-      .json({
-        message: "Orders successfully fetched",
-        all: orders,
-        reviewing,
-        shipping,
-        received,
-        completed,
-        cancelled,
-        returned,
-        refunded,
-      });
+    res.status(200).json({
+      message: "Orders successfully fetched",
+      all: orders,
+      reviewing,
+      shipping,
+      received,
+      completed,
+      cancelled,
+      returned,
+      refunded,
+    });
   }
 );
 
@@ -218,6 +216,25 @@ const rejectOrder = asyncHandler(
   }
 );
 
+// @desc    Mark order as received
+// @route   PATCH /api/order/:id/received
+// @access  Admin
+const receivedOrder = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const order = await findOrderOrError(req.params.id);
+
+    order.status = "RECEIVED";
+
+    try {
+      await order.save();
+
+      res.status(200).json({ message: "Order received", order });
+    } catch (error) {
+      throw new DatabaseError();
+    }
+  }
+);
+
 // @desc    Cancel the order
 // @route   POST /api/order/:id/cancel
 // @access  User & Admin
@@ -234,4 +251,5 @@ export {
   cancelOrder,
   acceptOrder,
   rejectOrder,
+  receivedOrder,
 };
