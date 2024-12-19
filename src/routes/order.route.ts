@@ -8,6 +8,7 @@ import checkParamIds from "../middlewares/objectId.middleware";
 import {
   getMyOrders,
   getAllOrders,
+  getOrder,
   createOrder,
   cancelOrder,
   acceptOrder,
@@ -19,6 +20,7 @@ const router = Router();
 
 router.route("/").get(protect, getMyOrders).post(protect, createOrder);
 router.route("/all").get(adminProtect, getAllOrders);
+router.route("/:id").get(protect, getOrder);
 router.route("/:id/cancel").post(protect, checkParamIds, cancelOrder);
 router.route("/:id/accept").patch(adminProtect, checkParamIds, acceptOrder);
 router.route("/:id/reject").patch(adminProtect, checkParamIds, rejectOrder);

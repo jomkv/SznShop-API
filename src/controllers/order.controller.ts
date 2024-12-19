@@ -24,6 +24,7 @@ import CartProduct from "../models/CartProduct";
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
 import { IStocksDocument } from "../@types/product.types";
+import AuthenticationError from "../errors/AuthenticationError";
 
 // @desc    Get my Orders
 // @route   GET /api/order
@@ -49,6 +50,27 @@ const getMyOrders = asyncHandler(
       cancelled,
       returned,
       refunded,
+    });
+  }
+);
+
+// @desc    Get Specific Orders
+// @route   GET /api/order/:id
+// @access  User & Admin
+const getOrder = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const order = await findOrderOrError(req.params.id);
+
+    if (
+      order.userId.toString() !== req.sznUser?.userId &&
+      req.sznUser?.role !== "admin"
+    ) {
+      throw new AuthenticationError();
+    }
+
+    res.status(200).json({
+      message: "Orders successfully fetched.",
+      order,
     });
   }
 );
@@ -154,6 +176,7 @@ const acceptOrder = asyncHandler(
     const order = await findOrderOrError(req.params.id);
 
     order.status = "SHIPPING";
+    order.timestamps.shippedAt = new Date();
 
     const session = await startSession();
     session.startTransaction();
@@ -205,6 +228,7 @@ const rejectOrder = asyncHandler(
     const order = await findOrderOrError(req.params.id);
 
     order.status = "CANCELLED";
+    order.timestamps.cancelledAt = new Date();
 
     try {
       await order.save();
@@ -224,6 +248,7 @@ const receivedOrder = asyncHandler(
     const order = await findOrderOrError(req.params.id);
 
     order.status = "RECEIVED";
+    order.timestamps.receivedAt = new Date();
 
     try {
       await order.save();
@@ -247,6 +272,7 @@ const cancelOrder = asyncHandler(
 export {
   getMyOrders,
   getAllOrders,
+  getOrder,
   createOrder,
   cancelOrder,
   acceptOrder,
