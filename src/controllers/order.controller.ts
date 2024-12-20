@@ -62,7 +62,7 @@ const getOrder = asyncHandler(
     const order = await findOrderOrError(req.params.id);
 
     if (
-      order.userId.toString() !== req.sznUser?.userId &&
+      order.userId.id.toString() !== req.sznUser?.userId &&
       req.sznUser?.role !== "admin"
     ) {
       throw new AuthenticationError();
@@ -260,6 +260,30 @@ const receivedOrder = asyncHandler(
   }
 );
 
+// @desc    Mark order as complete
+// @route   POST /api/order/:id/complete
+// @access  User
+const completeOrder = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const order = await findOrderOrError(req.params.id);
+
+    if (order.userId.id.toString() !== req.sznUser?.userId) {
+      throw new AuthenticationError();
+    }
+
+    order.status = "COMPLETED";
+    order.timestamps.completedAt = new Date();
+
+    try {
+      await order.save();
+
+      res.status(200).json({ message: "Order completed", order });
+    } catch (error) {
+      throw new DatabaseError();
+    }
+  }
+);
+
 // @desc    Cancel the order
 // @route   POST /api/order/:id/cancel
 // @access  User & Admin
@@ -278,4 +302,5 @@ export {
   acceptOrder,
   rejectOrder,
   receivedOrder,
+  completeOrder,
 };
