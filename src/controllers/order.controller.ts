@@ -261,7 +261,7 @@ const receivedOrder = asyncHandler(
 );
 
 // @desc    Mark order as complete
-// @route   POST /api/order/:id/complete
+// @route   PATCH /api/order/:id/complete
 // @access  User
 const completeOrder = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -285,11 +285,26 @@ const completeOrder = asyncHandler(
 );
 
 // @desc    Cancel the order
-// @route   POST /api/order/:id/cancel
+// @route   PATCH /api/order/:id/cancel
 // @access  User & Admin
 const cancelOrder = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    // TODO
+    const order = await findOrderOrError(req.params.id);
+
+    if (order.userId.id.toString() !== req.sznUser?.userId) {
+      throw new AuthenticationError();
+    }
+
+    order.status = "CANCELLED";
+    order.timestamps.cancelledAt = new Date();
+
+    try {
+      await order.save();
+
+      res.status(200).json({ message: "Order cancelled", order });
+    } catch (error) {
+      throw new DatabaseError();
+    }
   }
 );
 
