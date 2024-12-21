@@ -9,6 +9,7 @@ import {
 } from "../utils/findOrError";
 import { Types } from "mongoose";
 import {
+  IOrderDocument,
   IOrderProduct,
   IOrderProductDocument,
   IOrderProductInput,
@@ -59,14 +60,7 @@ const getMyOrders = asyncHandler(
 // @access  User & Admin
 const getOrder = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const order = await findOrderOrError(req.params.id);
-
-    if (
-      order.userId.id.toString() !== req.sznUser?.userId &&
-      req.sznUser?.role !== "admin"
-    ) {
-      throw new AuthenticationError();
-    }
+    const order = req.order as IOrderDocument;
 
     res.status(200).json({
       message: "Orders successfully fetched.",
@@ -265,11 +259,7 @@ const receivedOrder = asyncHandler(
 // @access  User
 const completeOrder = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const order = await findOrderOrError(req.params.id);
-
-    if (order.userId.id.toString() !== req.sznUser?.userId) {
-      throw new AuthenticationError();
-    }
+    const order = req.order as IOrderDocument;
 
     order.status = "COMPLETED";
     order.timestamps.completedAt = new Date();
@@ -289,11 +279,7 @@ const completeOrder = asyncHandler(
 // @access  User & Admin
 const cancelOrder = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const order = await findOrderOrError(req.params.id);
-
-    if (order.userId.id.toString() !== req.sznUser?.userId) {
-      throw new AuthenticationError();
-    }
+    const order = req.order as IOrderDocument;
 
     order.status = "CANCELLED";
     order.timestamps.cancelledAt = new Date();

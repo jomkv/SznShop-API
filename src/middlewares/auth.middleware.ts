@@ -2,11 +2,13 @@ import { NextFunction, Request, Response } from "express";
 import { IUserToken } from "../@types/user.types";
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
+import { IOrderDocument } from "../@types/order.types";
 
 declare global {
   namespace Express {
     interface Request {
       sznUser?: IUserToken;
+      order?: IOrderDocument;
     }
   }
 }
