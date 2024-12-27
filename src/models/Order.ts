@@ -91,7 +91,7 @@ orderSchema.virtual("orderProducts", {
 // pre hook to populate
 orderSchema.pre(["find", "findOne"], function (next) {
   this.populate({ path: "orderProducts" });
-  this.populate({ path: "userId", select: "firstName lastName" });
+  this.populate({ path: "userId" });
   next();
 });
 
