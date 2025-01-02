@@ -14,12 +14,12 @@ import { IImage } from "../@types/image.types";
 // * Models
 import Product from "../models/Product";
 import Stocks from "../models/Stocks";
+import CategoryProduct from "../models/CategoryProduct";
+import CartProduct from "../models/CartProduct";
 
 // * Custom Errors
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
-import CategoryProduct from "../models/CategoryProduct";
-import CartProduct from "../models/CartProduct";
 
 // @desc    Create Product
 // @route   POST /api/product

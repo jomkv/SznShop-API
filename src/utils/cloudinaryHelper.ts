@@ -26,7 +26,7 @@ const uploadImage = async (imageBuffer: Buffer): Promise<IImage> => {
   try {
     // Upload using buffer
     return await new Promise((resolve, reject) =>
-      // * TODO: apply options
+      // TODO: apply options
       cloudinary.uploader
         .upload_stream(options, (error, res: UploadApiResponse | undefined) => {
           if (error || !res) {
