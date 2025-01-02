@@ -19,7 +19,7 @@ export interface IOrderProductInput {
 }
 
 export interface IOrderProduct {
-  orderId: Types.ObjectId;
+  orderId: Types.ObjectId | IOrderDocument;
   productId: Types.ObjectId | IProductDocument;
   name: string;
   description: string;

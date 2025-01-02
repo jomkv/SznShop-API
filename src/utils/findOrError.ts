@@ -11,8 +11,9 @@ import Stocks from "../models/Stocks";
 import Address from "../models/Address";
 import { ICartProductDocument } from "../@types/cart.types";
 import CartProduct from "../models/CartProduct";
-import { IOrderDocument } from "../@types/order.types";
+import { IOrderDocument, IOrderProductDocument } from "../@types/order.types";
 import Order from "../models/Order";
+import OrderProduct from "../models/OrderProduct";
 
 export const findCategoryOrError = async (
   categoryId: string
@@ -82,4 +83,16 @@ export const findOrderOrError = async (id: string): Promise<IOrderDocument> => {
   }
 
   return order;
+};
+
+export const findOrderProductOrError = async (
+  id: string
+): Promise<IOrderProductDocument> => {
+  const op = await OrderProduct.findById(id);
+
+  if (!op) {
+    throw new BadRequestError("Order Product not found");
+  }
+
+  return op;
 };
