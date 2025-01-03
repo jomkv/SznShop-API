@@ -13,6 +13,11 @@ const ratingSchema: Schema = new Schema<IRating>(
       required: true,
       ref: "OrderProduct",
     },
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "Product",
+    },
     stars: {
       type: Number,
       required: true,
@@ -31,6 +36,11 @@ const ratingSchema: Schema = new Schema<IRating>(
     },
   }
 );
+
+ratingSchema.pre(["find", "findOne"], function (next) {
+  this.populate("userId");
+  next();
+});
 
 const Rating = model<IRating>("Rating", ratingSchema);
 

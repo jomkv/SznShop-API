@@ -63,6 +63,7 @@ const createRating = asyncHandler(
       const newRating = new Rating({
         userId: req.sznUser?.userId,
         orderProductId,
+        productId: orderProduct.productId.id,
         stars,
         comment,
       });
@@ -79,4 +80,20 @@ const createRating = asyncHandler(
   }
 );
 
-export { createRating };
+// @desc    Get ratings for a specific product
+// @route   GET /api/rating/:id
+// @access  User
+const getProductRatings = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const ratings: IRatingDocument[] = await Rating.find({
+      productId: req.params.id,
+    });
+
+    res.status(200).json({
+      message: "Ratings for product fetched",
+      ratings,
+    });
+  }
+);
+
+export { createRating, getProductRatings };

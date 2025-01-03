@@ -1,4 +1,5 @@
 import { Types, Document } from "mongoose";
+import { IUserDocument } from "./user.types";
 
 export interface IRatingInput {
   comment: string;
@@ -7,7 +8,8 @@ export interface IRatingInput {
 
 export interface IRating {
   orderProductId: Types.ObjectId;
-  userId: Types.ObjectId;
+  productId: Types.ObjectId;
+  userId: Types.ObjectId | IUserDocument;
   comment: string;
   stars: number;
 }
