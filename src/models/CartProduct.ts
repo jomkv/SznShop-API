@@ -19,7 +19,7 @@ const cartProductSchema: Schema = new Schema<ICartProduct>(
     },
     size: {
       type: String,
-      enum: ["xs", "sm", "md", "lg", "xl"],
+      enum: ["xs", "sm", "md", "lg", "xl", "xxl"],
       required: true,
     },
   },
