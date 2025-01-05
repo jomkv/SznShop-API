@@ -78,6 +78,10 @@ const orderSchema: Schema = new Schema<IOrderDocument>(
       type: Number,
       default: 100,
     },
+    isRated: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true, toJSON: { virtuals: true } }
 );

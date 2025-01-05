@@ -48,6 +48,7 @@ export interface IOrder {
   status: Status;
   shippingFee: number;
   userId: Types.ObjectId;
+  isRated: boolean;
 }
 
 export interface IOrderDocument extends IOrder, Document {

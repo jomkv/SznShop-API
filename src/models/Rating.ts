@@ -27,7 +27,7 @@ const ratingSchema: Schema = new Schema<IRating>(
     },
     comment: {
       type: String,
-      required: true,
+      required: false,
     },
   },
   {
