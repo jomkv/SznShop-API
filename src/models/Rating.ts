@@ -34,6 +34,7 @@ const ratingSchema: Schema = new Schema<IRating>(
     toJSON: {
       virtuals: true,
     },
+    timestamps: true,
   }
 );
 
