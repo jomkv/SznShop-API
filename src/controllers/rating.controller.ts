@@ -1,8 +1,12 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import { findOrderProductOrError } from "../utils/findOrError";
-import { IRatingDocument, IRatingInput } from "../@types/rating.types";
-import { IOrderDocument, IOrderProductDocument } from "../@types/order.types";
+import {
+  findOrderOrError,
+  findOrderProductOrError,
+} from "../utils/findOrError";
+import { IRatingInput, IRatingDocument } from "../@types/rating.types";
+import { IOrderProductDocument } from "../@types/order.types";
+import { startSession } from "mongoose";
 
 // * Models
 import Rating from "../models/Rating";
@@ -12,25 +16,16 @@ import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
 import AuthenticationError from "../errors/AuthenticationError";
 
-// @desc    Create Rating
+// @desc    Create Rating(s)
 // @route   POST /api/rating/:id
 // @access  User
 const createRating = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const orderProductId: string = req.params.id;
-    const { comment, stars }: IRatingInput = req.body;
+    const orderId: string = req.params.id;
+    const ratings: IRatingInput = req.body.ratings;
 
-    const orderProduct: IOrderProductDocument = await findOrderProductOrError(
-      orderProductId
-    );
-    await orderProduct.populate("orderId");
-
-    const order = orderProduct.orderId as IOrderDocument;
-
-    // If user is not the owner of the order
-    if (order.userId.id.toString() !== req.sznUser?.userId) {
-      throw new AuthenticationError();
-    }
+    const order = await findOrderOrError(orderId);
+    let newRatingsPromises = [];
 
     // If order is not yet complete
     if (order.status !== "COMPLETED") {
@@ -39,42 +34,64 @@ const createRating = asyncHandler(
       );
     }
 
-    if (!stars || !comment) {
-      throw new BadRequestError("Incomplete input");
+    for (const orderProductId in ratings) {
+      if (ratings.hasOwnProperty(orderProductId)) {
+        const { stars, comment } = ratings[orderProductId];
+
+        const orderProduct: IOrderProductDocument =
+          await findOrderProductOrError(orderProductId);
+
+        // If user is not the owner of the order
+        if (order.userId.id.toString() !== req.sznUser?.userId) {
+          throw new AuthenticationError();
+        }
+
+        if (!stars) {
+          throw new BadRequestError("Incomplete input");
+        }
+
+        if (!(stars >= 1 && stars <= 5)) {
+          throw new BadRequestError("Stars must be within 1-5 only");
+        }
+
+        // Look for a rating that already exists
+        const existingRating: IRatingDocument | null = await Rating.findOne({
+          userId: req.sznUser?.userId,
+          orderProductId,
+        });
+
+        if (existingRating) {
+          throw new BadRequestError("A rating for this already exists");
+        }
+
+        newRatingsPromises.push({
+          orderProductId: orderProduct.id,
+          productId: orderProduct.productId._id,
+          userId: req.sznUser?.userId,
+          comment,
+          stars,
+        });
+      }
     }
 
-    if (!(stars >= 1 && stars <= 5)) {
-      throw new BadRequestError("Stars must be within 1-5 only");
-    }
+    const newRatings: any[] = await Promise.all(newRatingsPromises);
+    order.isRated = true;
 
-    // Look for a rating that already exists
-    const existingRating: IRatingDocument | null = await Rating.findOne({
-      userId: req.sznUser?.userId,
-      orderProductId,
-    });
-
-    if (existingRating) {
-      throw new BadRequestError(
-        "A rating for this order product already exists"
-      );
-    }
+    const session = await startSession();
+    session.startTransaction();
 
     try {
-      const newRating = new Rating({
-        userId: req.sznUser?.userId,
-        orderProductId,
-        productId: orderProduct.productId.id,
-        stars,
-        comment,
-      });
+      await Rating.insertMany(newRatings, { session });
+      await order.save({ session });
 
-      await newRating.save();
+      await session.commitTransaction();
 
       return res.status(201).json({
-        message: "Rating successfully created",
-        newRating,
+        message: "Ratings successfully created",
+        newRatings,
       });
     } catch (error) {
+      await session.abortTransaction();
       throw new DatabaseError();
     }
   }

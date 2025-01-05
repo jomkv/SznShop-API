@@ -2,8 +2,10 @@ import { Types, Document } from "mongoose";
 import { IUserDocument } from "./user.types";
 
 export interface IRatingInput {
-  comment: string;
-  stars: number;
+  [orderProductId: string]: {
+    comment: string;
+    stars: number;
+  };
 }
 
 export interface IRating {

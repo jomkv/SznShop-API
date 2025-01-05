@@ -15,6 +15,7 @@ import {
   IOrderProductInput,
 } from "../@types/order.types";
 import { IAddressDocument } from "../@types/address.types";
+import { IStocksDocument } from "../@types/product.types";
 
 // * Models
 import Order from "../models/Order";
@@ -24,7 +25,6 @@ import CartProduct from "../models/CartProduct";
 // * Custom Errors
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
-import { IStocksDocument } from "../@types/product.types";
 import AuthenticationError from "../errors/AuthenticationError";
 
 // @desc    Get my Orders
