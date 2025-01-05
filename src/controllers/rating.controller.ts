@@ -106,8 +106,21 @@ const getProductRatings = asyncHandler(
       productId: req.params.id,
     });
 
+    let average: number = 0;
+
+    if (ratings.length > 0) {
+      let sum: number = 0;
+
+      ratings.forEach((rating) => {
+        sum += rating.stars;
+      });
+
+      average = Math.round(sum / ratings.length);
+    }
+
     res.status(200).json({
       message: "Ratings for product fetched",
+      average,
       ratings,
     });
   }
