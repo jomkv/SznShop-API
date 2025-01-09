@@ -15,6 +15,7 @@ import Rating from "../models/Rating";
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
 import AuthenticationError from "../errors/AuthenticationError";
+import { filterString } from "../utils/filter";
 
 // @desc    Create Rating(s)
 // @route   POST /api/rating/:id
@@ -68,7 +69,7 @@ const createRating = asyncHandler(
           orderProductId: orderProduct.id,
           productId: orderProduct.productId._id,
           userId: req.sznUser?.userId,
-          comment,
+          comment: filterString(comment),
           stars,
         });
       }
