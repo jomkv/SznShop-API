@@ -31,6 +31,10 @@ const userSchema: Schema = new Schema<IUserDocument>({
     type: Date,
     default: Date.now,
   },
+  isBanned: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const User = model<IUserDocument>("User", userSchema);

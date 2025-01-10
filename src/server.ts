@@ -17,6 +17,7 @@ import cartRoutes from "./routes/cart.route";
 import addressRoutes from "./routes/address.route";
 import orderRoutes from "./routes/order.route";
 import ratingRoutes from "./routes/rating.route";
+import userRoutes from "./routes/user.route";
 import "./utils/cron";
 
 // * Configs
@@ -44,6 +45,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/address", addressRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/rating", ratingRoutes);
+app.use("/api/user", userRoutes);
 
 app.all(
   "*",
