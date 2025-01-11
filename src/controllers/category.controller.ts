@@ -56,6 +56,7 @@ const createCategory = asyncHandler(
 
       res.status(201).json({ message: "Category created", category });
     } catch (error) {
+      await session.abortTransaction();
       throw new DatabaseError();
     }
   }

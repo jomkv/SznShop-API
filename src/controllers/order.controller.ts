@@ -157,6 +157,7 @@ const createOrder = asyncHandler(
 
       res.status(201).json({ message: "Order created", order, orderProducts });
     } catch (error) {
+      await session.abortTransaction();
       throw new DatabaseError();
     }
   }
