@@ -4,7 +4,6 @@ import { IProductDocument, Size } from "../@types/product.types";
 import { findCartItemOrError, findProductOrError } from "../utils/findOrError";
 
 // * Models
-import User from "../models/User";
 import CartProduct from "../models/CartProduct";
 
 // * Custom Errors

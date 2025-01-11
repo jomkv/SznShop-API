@@ -7,6 +7,7 @@ import {
 import { IRatingInput, IRatingDocument } from "../@types/rating.types";
 import { IOrderProductDocument } from "../@types/order.types";
 import { startSession } from "mongoose";
+import { filterString } from "../utils/filter";
 
 // * Models
 import Rating from "../models/Rating";
@@ -15,7 +16,6 @@ import Rating from "../models/Rating";
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
 import AuthenticationError from "../errors/AuthenticationError";
-import { filterString } from "../utils/filter";
 
 // @desc    Create Rating(s)
 // @route   POST /api/rating/:id

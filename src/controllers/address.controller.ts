@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { IAddressInput, IAddressDocument } from "../@types/address.types";
+import { findAddressOrError } from "../utils/findOrError";
+import { startSession } from "mongoose";
 
 // * Models
 import Address from "../models/Address";
@@ -9,8 +11,6 @@ import Address from "../models/Address";
 import BadRequestError from "../errors/BadRequestError";
 import AuthenticationError from "../errors/AuthenticationError";
 import DatabaseError from "../errors/DatabaseError";
-import { findAddressOrError } from "../utils/findOrError";
-import { startSession } from "mongoose";
 
 // @desc    Create a new address
 // @route   POST /api/address
