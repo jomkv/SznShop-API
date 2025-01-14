@@ -12,9 +12,9 @@ const autoCompleteOrders = async (): Promise<any> => {
         createdAt: { $lte: sevenDaysAgo },
       },
       {
-        status: "COMPLETED",
+        status: "RETURN",
         timestamps: {
-          completedAt: new Date(),
+          returnedAt: new Date(),
         },
       }
     );
