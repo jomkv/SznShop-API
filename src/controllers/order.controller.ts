@@ -6,6 +6,7 @@ import {
   findOrderOrError,
   findProductOrError,
   findStocksOrError,
+  findUserOrError,
 } from "../utils/findOrError";
 import { Types } from "mongoose";
 import {
@@ -26,6 +27,8 @@ import CartProduct from "../models/CartProduct";
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
 import AuthenticationError from "../errors/AuthenticationError";
+import sendEmail from "../utils/nodemailer";
+import { IUserDocument } from "../@types/user.types";
 
 // @desc    Get my Orders
 // @route   GET /api/order
@@ -107,6 +110,9 @@ const createOrder = asyncHandler(
     const isCart: boolean = Boolean(req.body.isCart);
 
     const address: IAddressDocument = await findAddressOrError(addressId);
+    const user: IUserDocument = await findUserOrError(
+      req.sznUser?.userId as string
+    );
 
     const session = await startSession();
     session.startTransaction();
@@ -122,17 +128,34 @@ const createOrder = asyncHandler(
       });
       await order.save({ session });
 
+      let orderTotal = 0;
+      let orderItemsTableHtml = "";
+
       // Create order products
       const orderProducts: IOrderProduct[] = await Promise.all(
-        rawProducts.map(async (product: IOrderProductInput) => {
-          const prod = await findProductOrError(product.productId);
+        rawProducts.map(async (op: IOrderProductInput) => {
+          const prod = await findProductOrError(op.productId);
 
-          if (prod.stocks[product.size] < product.quantity) {
+          if (prod.stocks[op.size] < op.quantity) {
             throw new BadRequestError("Not enough stocks");
           }
 
+          orderTotal += op.quantity * prod.price;
+          orderItemsTableHtml += `
+            <tr>
+              <td>
+                <a href="${process.env.CLIENT_URL}/product/${prod._id}">
+                  ${prod.name}
+                </a>
+              </td>
+              <td>${op.quantity}</td>
+              <td>₱${prod.price.toLocaleString()}</td>
+              <td>₱${(prod.price * op.quantity).toLocaleString()}</td>
+            </tr>
+          `;
+
           const payload: IOrderProduct = {
-            ...product,
+            ...op,
             productId: prod._id as unknown as Types.ObjectId,
             orderId: order._id as Types.ObjectId,
             name: prod.name,
@@ -153,6 +176,95 @@ const createOrder = asyncHandler(
       }
 
       await OrderProduct.insertMany(orderProducts, { session });
+
+      await sendEmail(
+        process.env.ADMIN_EMAIL as string,
+        `New Order Received: Order #${order._id}`,
+        `
+        <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>New Order Received</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+              }
+              .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+              }
+              .header {
+                text-align: center;
+                margin-bottom: 20px;
+              }
+              .order-details {
+                margin-bottom: 20px;
+              }
+              .order-details th, .order-details td {
+                padding: 10px;
+                border: 1px solid #ddd;
+              }
+              .order-details th {
+                background-color: #f4f4f4;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>New Order Received</h1>
+              </div>
+              <p>Dear SZN Admin,</p>
+              <p>A new order has been placed. Here are the details:</p>
+              <div class="order-details">
+                <table width="100%">
+                  <tr>
+                    <th>Order ID</th>
+                    <td>${order._id}</td>
+                  </tr>
+                  <tr>
+                    <th>Customer Name</th>
+                    <td>${user.displayName}</td>
+                  </tr>
+                  <tr>
+                    <th>Customer Email</th>
+                    <td>${user.email}</td>
+                  </tr>
+                  <tr>
+                    <th>Total Amount</th>
+                    <td>₱${orderTotal.toLocaleString()}</td>
+                  </tr>
+                  <tr>
+                    <th>Order Date</th>
+                    <td>${order.createdAt}</td>
+                  </tr>
+                </table>
+              </div>
+              <h2>Order Items</h2>
+              <table width="100%" class="order-details">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${orderItemsTableHtml}
+                </tbody>
+              </table>
+            </div>
+          </body>
+          </html>
+        `
+      );
+
       await session.commitTransaction();
 
       res.status(201).json({ message: "Order created", order, orderProducts });

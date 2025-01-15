@@ -14,6 +14,8 @@ import CartProduct from "../models/CartProduct";
 import { IOrderDocument, IOrderProductDocument } from "../@types/order.types";
 import Order from "../models/Order";
 import OrderProduct from "../models/OrderProduct";
+import { IUserDocument } from "../@types/user.types";
+import User from "../models/User";
 
 export const findCategoryOrError = async (
   categoryId: string
@@ -95,4 +97,14 @@ export const findOrderProductOrError = async (
   }
 
   return op;
+};
+
+export const findUserOrError = async (id: string): Promise<IUserDocument> => {
+  const user = await User.findById(id);
+
+  if (!user) {
+    throw new BadRequestError("User not found");
+  }
+
+  return user;
 };

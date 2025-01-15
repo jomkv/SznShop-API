@@ -9,11 +9,11 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendMail = async (
+const sendEmail = async (
   recipientEmail: string,
   subject: string,
   htmlContent: string
-) => {
+): Promise<void> => {
   const mailDetails: SendMailOptions = {
     from: process.env.NODEMAILER_USER,
     to: recipientEmail,
@@ -22,11 +22,11 @@ const sendMail = async (
     html: htmlContent,
   };
 
-  transporter.sendMail(mailDetails, (err, data) => {
-    if (err) {
-      throw new BadRequestError("Error, unable to send email");
-    }
-  });
+  try {
+    await transporter.sendMail(mailDetails);
+  } catch (error) {
+    throw new BadRequestError("Error, unable to send email");
+  }
 };
 
-export default sendMail;
+export default sendEmail;
