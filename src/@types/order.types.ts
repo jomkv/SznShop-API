@@ -2,6 +2,7 @@ import { IAddressInput } from "./address.types";
 import { Size } from "./product.types";
 import { Document, Types } from "mongoose";
 import { IProductDocument } from "./product.types";
+import { IUserDocument } from "./user.types";
 
 export type Status =
   | "REVIEWING"
@@ -47,7 +48,7 @@ export interface IOrder {
   timestamps: IOrderTimestamps;
   status: Status;
   shippingFee: number;
-  userId: Types.ObjectId;
+  userId: IUserDocument;
   isRated: boolean;
 }
 

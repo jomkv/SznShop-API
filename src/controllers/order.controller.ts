@@ -17,6 +17,8 @@ import {
 } from "../@types/order.types";
 import { IAddressDocument } from "../@types/address.types";
 import { IStocksDocument } from "../@types/product.types";
+import sendEmail from "../utils/nodemailer";
+import { IUserDocument } from "../@types/user.types";
 
 // * Models
 import Order from "../models/Order";
@@ -27,8 +29,6 @@ import CartProduct from "../models/CartProduct";
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
 import AuthenticationError from "../errors/AuthenticationError";
-import sendEmail from "../utils/nodemailer";
-import { IUserDocument } from "../@types/user.types";
 
 // @desc    Get my Orders
 // @route   GET /api/order
@@ -305,7 +305,21 @@ const acceptOrder = asyncHandler(
     try {
       await order.save({ session });
 
+      let total = 0;
+      let tableHtml = "";
+
       for (const op of orderProducts) {
+        const subtotal = op.price * op.quantity;
+        total += subtotal;
+        tableHtml += `
+          <tr>
+            <td><a href="${process.env.CLIENT_URL}/product/${op.productId._id}">${op.name}</a></td>
+            <td>${op.quantity}</td>
+            <td>₱${op.price}</td>
+            <td>₱${subtotal}</td>
+          </tr>
+        `;
+
         const stock = stocks.find(
           (stock) => stock.productId.toString() === op.productId.toString()
         );
@@ -318,6 +332,85 @@ const acceptOrder = asyncHandler(
       }
 
       await session.commitTransaction();
+
+      await sendEmail(
+        order.userId.email,
+        `Your Order Has Been Accepted: Order #${order._id}`,
+        `
+          <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <title>Order Accepted</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  line-height: 1.6;
+                }
+                .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  padding: 20px;
+                  border: 1px solid #ddd;
+                  border-radius: 5px;
+                }
+                .header {
+                  text-align: center;
+                  margin-bottom: 20px;
+                }
+                .order-details {
+                  margin-bottom: 20px;
+                }
+                .order-details th, .order-details td {
+                  padding: 10px;
+                  border: 1px solid #ddd;
+                }
+                .order-details th {
+                  background-color: #f4f4f4;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>Order Accepted</h1>
+                </div>
+                <p>Dear ${order.userId.displayName},</p>
+                <p>We are pleased to inform you that your order has been accepted. Here are the details:</p>
+                <div class="order-details">
+                  <table width="100%">
+                    <tr>
+                      <th>Order ID</th>
+                      <td>${order._id}</td>
+                    </tr>
+                    <tr>
+                      <th>Total Amount</th>
+                      <td>₱${total}</td>
+                    </tr>
+                  </table>
+                </div>
+                <h2>Order Items</h2>
+                <table width="100%" class="order-details">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                      <th>Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${tableHtml}
+                  </tbody>
+                </table>
+                <p>Thank you for shopping with us!</p>
+                <p>Best regards,</p>
+                <p>The SZN Team</p>
+              </div>
+            </body>
+            </html>
+        `
+      );
 
       res.status(200).json({ message: "Order accepted", order });
     } catch (error) {
