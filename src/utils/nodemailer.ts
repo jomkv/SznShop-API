@@ -25,7 +25,7 @@ const sendEmail = async (
   try {
     await transporter.sendMail(mailDetails);
   } catch (error) {
-    throw new BadRequestError("Error, unable to send email");
+    // Do nothing
   }
 };
 
