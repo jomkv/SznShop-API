@@ -263,7 +263,7 @@ const getProductBuyNow = asyncHandler(
     const size: Size = req.query.size as Size;
     const quantity: number = Number(req.query.quantity) || 1;
 
-    const allowedSizes: Size[] = ["xs", "sm", "md", "lg", "xl"];
+    const allowedSizes: Size[] = ["xs", "sm", "md", "lg", "xl", "xxl"];
 
     if (quantity > product.stocks[size]) {
       throw new BadRequestError("Not enough stocks");
