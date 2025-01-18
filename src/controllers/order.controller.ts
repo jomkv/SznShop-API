@@ -430,8 +430,107 @@ const rejectOrder = asyncHandler(
     order.status = "CANCELLED";
     order.timestamps.cancelledAt = new Date();
 
+    const orderProducts: IOrderProductDocument[] = await OrderProduct.find({
+      orderId: order._id,
+    });
+
+    let total = 0;
+    let tableHtml = "";
+
+    for (const op of orderProducts) {
+      const subtotal = op.price * op.quantity;
+      total += subtotal;
+      tableHtml += `
+        <tr>
+          <td><a href="${process.env.CLIENT_URL}/product/${op.productId._id}">${op.name}</a></td>
+          <td>${op.quantity}</td>
+          <td>₱${op.price}</td>
+          <td>₱${subtotal}</td>
+        </tr>
+      `;
+    }
+
     try {
       await order.save();
+
+      await sendEmail(
+        order.userId.email,
+        `Your Order Has Been Rejected: Order #${order._id}`,
+        `
+        <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>Order Rejected</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+              }
+              .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+              }
+              .header {
+                text-align: center;
+                margin-bottom: 20px;
+              }
+              .order-details {
+                margin-bottom: 20px;
+              }
+              .order-details th, .order-details td {
+                padding: 10px;
+                border: 1px solid #ddd;
+              }
+              .order-details th {
+                background-color: #f4f4f4;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Order Rejected</h1>
+              </div>
+              <p>Dear ${order.userId.displayName},</p>
+              <p>We regret to inform you that your order has been rejected. Here are the details:</p>
+              <div class="order-details">
+                <table width="100%">
+                  <tr>
+                    <th>Order ID</th>
+                    <td>${order._id}</td>
+                  </tr>
+                  <tr>
+                    <th>Total Amount</th>
+                    <td>₱${total}</td>
+                  </tr>
+                </table>
+              </div>
+              <h2>Order Items</h2>
+              <table width="100%" class="order-details">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${tableHtml}
+                </tbody>
+              </table>
+              <p>Thank you for shopping with us!</p>
+              <p>Best regards,</p>
+              <p>The SZN Team</p>
+            </div>
+          </body>
+          </html>
+      `
+      );
 
       res.status(200).json({ message: "Order reject", order });
     } catch (error) {
