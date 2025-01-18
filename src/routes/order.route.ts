@@ -16,6 +16,7 @@ import {
   rejectOrder,
   receivedOrder,
   completeOrder,
+  returnOrder,
 } from "../controllers/order.controller";
 
 const router = Router();
@@ -29,6 +30,7 @@ router
 router.route("/:id/accept").patch(adminProtect, checkParamIds, acceptOrder);
 router.route("/:id/reject").patch(adminProtect, checkParamIds, rejectOrder);
 router.route("/:id/received").patch(adminProtect, checkParamIds, receivedOrder);
+router.route("/:id/return").patch(adminProtect, checkParamIds, returnOrder);
 router
   .route("/:id/complete")
   .patch(protect, checkParamIds, orderProtect(false), completeOrder);
