@@ -7,6 +7,10 @@ const categorySchema: Schema = new Schema<ICategoryDocument>(
       type: String,
       required: true,
     },
+    description: {
+      type: String,
+      required: false,
+    },
     showInMenu: {
       type: Boolean,
       default: false,

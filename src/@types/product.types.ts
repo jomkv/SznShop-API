@@ -26,11 +26,13 @@ export interface ICategoryDocument extends Document {
   _id: string;
   id?: string;
   name: string; // unique
+  description: string;
   showInMenu: boolean;
 }
 
 export interface ICategoryInput {
   name: string;
+  description: string;
   showInMenu?: boolean;
   productIds?: string[];
 }

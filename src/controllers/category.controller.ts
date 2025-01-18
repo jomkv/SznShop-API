@@ -21,7 +21,8 @@ import CategoryProduct from "../models/CategoryProduct";
 // @access  Admin
 const createCategory = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    let { name, showInMenu, productIds }: ICategoryInput = req.body;
+    let { name, showInMenu, description, productIds }: ICategoryInput =
+      req.body;
 
     if (!name) {
       throw new BadRequestError("Incomplete input");
@@ -39,7 +40,7 @@ const createCategory = asyncHandler(
     session.startTransaction();
 
     try {
-      const category = new Category({ name, showInMenu });
+      const category = new Category({ name, description, showInMenu });
 
       if (productIds) {
         const cps =
