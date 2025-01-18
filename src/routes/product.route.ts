@@ -18,11 +18,15 @@ import {
   changeProductStatus,
   getProductBuyNow,
   getProductsCartCheckout,
+  getProductsCategory,
 } from "../controllers/product.controller";
 
 const router = Router();
 
-router.route("/").post(adminProtect, uploader, createProduct);
+router
+  .route("/")
+  .get(getProductsCategory)
+  .post(adminProtect, uploader, createProduct);
 
 router.route("/all").get(adminProtect, getAllProducts);
 router.route("/home").get(getProductsHome);

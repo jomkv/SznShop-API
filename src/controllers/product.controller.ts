@@ -20,6 +20,7 @@ import CartProduct from "../models/CartProduct";
 // * Custom Errors
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
+import Category from "../models/Category";
 
 // @desc    Create Product
 // @route   POST /api/product
@@ -309,6 +310,38 @@ const getProductsCartCheckout = asyncHandler(
   }
 );
 
+// @desc    Get products for category
+// @route   GET /api/product?categoryName=categoryName
+// @access  All
+const getProductsCategory = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const categoryName = req.query.categoryName;
+
+    if (!categoryName) {
+      throw new BadRequestError("Error, category not provided");
+    }
+
+    const category = await Category.findOne({
+      name: categoryName,
+    });
+
+    if (!category || !category.showInMenu) {
+      throw new BadRequestError("Error, category not found");
+    }
+
+    const categoryProducts = await CategoryProduct.find({
+      categoryId: category._id,
+    });
+
+    res
+      .status(200)
+      .json({
+        message: "Products for category fetched",
+        products: categoryProducts,
+      });
+  }
+);
+
 export {
   createProduct,
   getAllProducts,
@@ -321,4 +354,5 @@ export {
   changeProductStatus,
   getProductBuyNow,
   getProductsCartCheckout,
+  getProductsCategory,
 };
