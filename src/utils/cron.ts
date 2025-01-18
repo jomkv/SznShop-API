@@ -9,10 +9,10 @@ const autoCompleteOrders = async (): Promise<any> => {
     await Order.updateMany(
       {
         status: "RECEIVED",
-        createdAt: { $lte: sevenDaysAgo },
+        receivedAt: { $lte: sevenDaysAgo },
       },
       {
-        status: "RETURN",
+        status: "COMPLETED",
         timestamps: {
           returnedAt: new Date(),
         },
