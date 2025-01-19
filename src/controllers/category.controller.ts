@@ -184,6 +184,7 @@ const editCategory = asyncHandler(
 
     const newProductIds: string[] | undefined = req.body.productIds;
     let newCategoryName: string | undefined = req.body.name;
+    let newCategoryDescription: string | undefined = req.body.description;
     let showInMenu: boolean | undefined = req.body.showInMenu;
 
     if (!newProductIds) {
@@ -192,6 +193,10 @@ const editCategory = asyncHandler(
 
     if (!newCategoryName) {
       newCategoryName = category.name;
+    }
+
+    if (!newCategoryDescription) {
+      newCategoryDescription = category.description;
     }
 
     if (!showInMenu) {
@@ -217,6 +222,7 @@ const editCategory = asyncHandler(
     const cpCount = existingCps.length - removedCps.length + addedCps.length;
 
     category.name = newCategoryName;
+    category.description = newCategoryDescription;
     category.showInMenu = cpCount < 4 ? false : showInMenu;
 
     const session = await startSession();

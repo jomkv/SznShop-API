@@ -333,12 +333,11 @@ const getProductsCategory = asyncHandler(
       categoryId: category._id,
     });
 
-    res
-      .status(200)
-      .json({
-        message: "Products for category fetched",
-        products: categoryProducts,
-      });
+    res.status(200).json({
+      message: "Products for category fetched",
+      products: categoryProducts,
+      category,
+    });
   }
 );
 
