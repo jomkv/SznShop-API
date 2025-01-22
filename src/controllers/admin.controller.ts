@@ -2,17 +2,20 @@ import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import { getWeekStartAndEnd } from "../utils/adminHelper";
 import { IOrderDocument } from "../@types/order.types";
+import { IHomeCarouselDocument, IImage } from "../@types/image.types";
+import { deleteImages, uploadImages } from "../utils/cloudinaryHelper";
 
 // * Models
 import Order from "../models/Order";
 import Product from "../models/Product";
+import HomeCarousel from "../models/HomeCarousel";
 
 // * Custom Errors
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
 
 // @desc    Get Statistics for Dashboard
-// @route   POST /api/admin/dashboard
+// @route   GET /api/admin/dashboard
 // @access  Admin
 const getDashboardStats = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -116,4 +119,63 @@ const getDashboardStats = asyncHandler(
   }
 );
 
-export { getDashboardStats };
+// @desc    Get home carousel images
+// @route   GET /api/admin/home-images
+// @access  Public
+const getHomeImages = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const homeCarousel = await HomeCarousel.findOne({});
+
+    const homeImages = homeCarousel ? homeCarousel.images : [];
+
+    res.status(200).json({
+      message: "Home images fetched",
+      homeImages,
+    });
+  }
+);
+
+// @desc    Set home carousel images
+// @route   POST /api/admin/home-images
+// @access  Admin
+const setHomeImages = asyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const files = req.files as Express.Multer.File[] | undefined;
+
+    if (!files) {
+      throw new BadRequestError("No images provided");
+    }
+
+    const homeCarousel: IHomeCarouselDocument | null =
+      await HomeCarousel.findOne({});
+    const newImages: IImage[] = await uploadImages(files);
+
+    if (!homeCarousel) {
+      const newHomeCarousel = new HomeCarousel({
+        images: newImages,
+      });
+
+      await newHomeCarousel.save();
+      return res.status(201).json({
+        message: "New home carousel created",
+        newHomeCarousel,
+      });
+    }
+
+    const oldImages: IImage[] = homeCarousel.images;
+    homeCarousel.images = newImages;
+
+    try {
+      await homeCarousel.save();
+      await deleteImages(oldImages);
+
+      res
+        .status(200)
+        .json({ message: "Home images successfully set", newImages });
+    } catch (error) {
+      throw new DatabaseError();
+    }
+  }
+);
+
+export { getDashboardStats, getHomeImages, setHomeImages };

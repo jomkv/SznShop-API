@@ -16,11 +16,11 @@ import Product from "../models/Product";
 import Stocks from "../models/Stocks";
 import CategoryProduct from "../models/CategoryProduct";
 import CartProduct from "../models/CartProduct";
+import Category from "../models/Category";
 
 // * Custom Errors
 import BadRequestError from "../errors/BadRequestError";
 import DatabaseError from "../errors/DatabaseError";
-import Category from "../models/Category";
 
 // @desc    Create Product
 // @route   POST /api/product

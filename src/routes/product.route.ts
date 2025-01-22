@@ -26,7 +26,7 @@ const router = Router();
 router
   .route("/")
   .get(getProductsCategory)
-  .post(adminProtect, uploader, createProduct);
+  .post(adminProtect, uploader(4), createProduct);
 
 router.route("/all").get(adminProtect, getAllProducts);
 router.route("/home").get(getProductsHome);
@@ -36,7 +36,7 @@ router.route("/checkout/:id").get(protect, checkParamIds, getProductBuyNow);
 router
   .route("/:id")
   .get(checkParamIds, getProduct)
-  .put(adminProtect, checkParamIds, uploader, editProduct)
+  .put(adminProtect, checkParamIds, uploader(4), editProduct)
   .delete(adminProtect, checkParamIds, deleteProduct);
 
 router

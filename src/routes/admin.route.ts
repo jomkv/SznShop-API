@@ -4,10 +4,19 @@ import { Router } from "express";
 import { adminProtect } from "../middlewares/auth.middleware";
 
 // * Controllers
-import { getDashboardStats } from "../controllers/admin.controller";
+import {
+  getDashboardStats,
+  getHomeImages,
+  setHomeImages,
+} from "../controllers/admin.controller";
+import uploader from "../middlewares/upload.middleware";
 
 const router = Router();
 
 router.route("/dashboard").get(adminProtect, getDashboardStats);
+router
+  .route("/home-images")
+  .get(getHomeImages)
+  .post(adminProtect, uploader(6), setHomeImages);
 
 export default router;

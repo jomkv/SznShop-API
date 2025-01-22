@@ -18,24 +18,26 @@ const fileFilter = (req: Request, file: any, cb: any) => {
   }
 };
 
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 1024 * 1024 * 10, // 10mb
-  },
-}).array("images", 4);
+const uploader = (limit: number) => {
+  const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: {
+      fileSize: 1024 * 1024 * 10, // 10mb
+    },
+  }).array("images", limit);
 
-const uploader = (req: Request, res: Response, next: NextFunction) => {
-  upload(req, res, (err: any) => {
-    if (err instanceof multer.MulterError) {
-      return next(new Error(`Multer Error ${err.message}`));
-    } else if (err) {
-      return next(new Error(err.message));
-    }
+  return (req: Request, res: Response, next: NextFunction) => {
+    upload(req, res, (err: any) => {
+      if (err instanceof multer.MulterError) {
+        return next(new Error(`Multer Error ${err.message}`));
+      } else if (err) {
+        return next(new Error(err.message));
+      }
 
-    next();
-  });
+      next();
+    });
+  };
 };
 
 export default uploader;
