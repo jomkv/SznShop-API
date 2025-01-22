@@ -26,7 +26,7 @@ const productSchema: Schema = new Schema<IProductDocument>(
       default: true,
     },
   },
-  { toJSON: { virtuals: true } }
+  { toJSON: { virtuals: true }, timestamps: true }
 );
 
 softDeletePlugin(productSchema);
