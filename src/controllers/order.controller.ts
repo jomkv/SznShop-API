@@ -434,21 +434,7 @@ const rejectOrder = asyncHandler(
       orderId: order._id,
     });
 
-    let total = 0;
-    let tableHtml = "";
-
-    for (const op of orderProducts) {
-      const subtotal = op.price * op.quantity;
-      total += subtotal;
-      tableHtml += `
-        <tr>
-          <td><a href="${process.env.CLIENT_URL}/product/${op.productId._id}">${op.name}</a></td>
-          <td>${op.quantity}</td>
-          <td>₱${op.price}</td>
-          <td>₱${subtotal}</td>
-        </tr>
-      `;
-    }
+    const { total, tableHtml } = getOrderTableAndTotal(orderProducts);
 
     try {
       await order.save();
@@ -549,8 +535,91 @@ const receivedOrder = asyncHandler(
     order.status = "RECEIVED";
     order.timestamps.receivedAt = new Date();
 
+    const orderProducts = await OrderProduct.find({ orderId: order._id });
+
+    const { total, tableHtml } = getOrderTableAndTotal(orderProducts);
+
     try {
       await order.save();
+
+      await sendEmail(
+        order.userId.email,
+        `Your Order Has Been Received: Order #${order._id}`,
+        `
+        <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>Order Rejected</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+              }
+              .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+              }
+              .header {
+                text-align: center;
+                margin-bottom: 20px;
+              }
+              .order-details {
+                margin-bottom: 20px;
+              }
+              .order-details th, .order-details td {
+                padding: 10px;
+                border: 1px solid #ddd;
+              }
+              .order-details th {
+                background-color: #f4f4f4;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Order Received</h1>
+              </div>
+              <p>Dear ${order.userId.displayName},</p>
+              <p>Your order has been received. Here are the details:</p>
+              <div class="order-details">
+                <table width="100%">
+                  <tr>
+                    <th>Order ID</th>
+                    <td>${order._id}</td>
+                  </tr>
+                  <tr>
+                    <th>Total Amount</th>
+                    <td>₱${total}</td>
+                  </tr>
+                </table>
+              </div>
+              <h2>Order Items</h2>
+              <table width="100%" class="order-details">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${tableHtml}
+                </tbody>
+              </table>
+              <p>If you have any questions or need further assistance, please contact our support team.</p>
+              <p>Best regards,</p>
+              <p>The SZN Team</p>
+            </div>
+          </body>
+          </html>
+      `
+      );
 
       res.status(200).json({ message: "Order received", order });
     } catch (error) {
@@ -568,6 +637,10 @@ const completeOrder = asyncHandler(
 
     order.status = "COMPLETED";
     order.timestamps.completedAt = new Date();
+
+    const orderProducts = await OrderProduct.find({ orderId: order._id });
+
+    const { total, tableHtml } = getOrderTableAndTotal(orderProducts);
 
     try {
       await order.save();
@@ -589,8 +662,171 @@ const cancelOrder = asyncHandler(
     order.status = "CANCELLED";
     order.timestamps.cancelledAt = new Date();
 
+    const orderProducts = await OrderProduct.find({ orderId: order._id });
+
+    const { total, tableHtml } = getOrderTableAndTotal(orderProducts);
+
     try {
       await order.save();
+
+      // Send email to client
+      await sendEmail(
+        order.userId.email,
+        `You Canceled Your Order : Order #${order._id}`,
+        `
+          <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <title>Order Canceled</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  line-height: 1.6;
+                }
+                .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  padding: 20px;
+                  border: 1px solid #ddd;
+                  border-radius: 5px;
+                }
+                .header {
+                  text-align: center;
+                  margin-bottom: 20px;
+                }
+                .order-details {
+                  margin-bottom: 20px;
+                }
+                .order-details th, .order-details td {
+                  padding: 10px;
+                  border: 1px solid #ddd;
+                }
+                .order-details th {
+                  background-color: #f4f4f4;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>Order Canceled</h1>
+                </div>
+                <p>Dear ${order.userId.displayName},</p>
+                <p>We regret to inform you that your order has been canceled. Here are the details:</p>
+                <div class="order-details">
+                  <table width="100%">
+                    <tr>
+                      <th>Order ID</th>
+                      <td>${order._id}</td>
+                    </tr>
+                    <tr>
+                      <th>Total Amount</th>
+                      <td>₱${total}</td>
+                    </tr>
+                  </table>
+                </div>
+                <h2>Order Items</h2>
+                <table width="100%" class="order-details">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                      <th>Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${tableHtml}
+                  </tbody>
+                </table>
+                <p>If you have any questions or need further assistance, please contact our support team.</p>
+                <p>Best regards,</p>
+                <p>The SZN Team</p>
+              </div>
+            </body>
+            </html>
+        `
+      );
+
+      // Send email to admin
+      await sendEmail(
+        order.userId.email,
+        `Order Canceled: Order #${order._id}`,
+        `
+          <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <title>Order Canceled</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  line-height: 1.6;
+                }
+                .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  padding: 20px;
+                  border: 1px solid #ddd;
+                  border-radius: 5px;
+                }
+                .header {
+                  text-align: center;
+                  margin-bottom: 20px;
+                }
+                .order-details {
+                  margin-bottom: 20px;
+                }
+                .order-details th, .order-details td {
+                  padding: 10px;
+                  border: 1px solid #ddd;
+                }
+                .order-details th {
+                  background-color: #f4f4f4;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>Order Canceled</h1>
+                </div>
+                <p>Dear ${order.userId.displayName},</p>
+                <p>We regret to inform you that a customer order has canceled their order. Here are the details:</p>
+                <div class="order-details">
+                  <table width="100%">
+                    <tr>
+                      <th>Order ID</th>
+                      <td>${order._id}</td>
+                    </tr>
+                    <tr>
+                      <th>Total Amount</th>
+                      <td>₱${total}</td>
+                    </tr>
+                  </table>
+                </div>
+                <h2>Order Items</h2>
+                <table width="100%" class="order-details">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                      <th>Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${tableHtml}
+                  </tbody>
+                </table>
+                <p>Best regards,</p>
+                <p>The SZN Team</p>
+              </div>
+            </body>
+            </html>
+        `
+      );
 
       res.status(200).json({ message: "Order cancelled", order });
     } catch (error) {
@@ -629,21 +865,10 @@ const returnOrder = asyncHandler(
     try {
       await order.save({ session });
 
-      let total = 0;
-      let tableHtml = "";
+      const { total, tableHtml } = getOrderTableAndTotal(orderProducts);
 
+      // Replenish stocks
       for (const op of orderProducts) {
-        const subtotal = op.price * op.quantity;
-        total += subtotal;
-        tableHtml += `
-          <tr>
-            <td><a href="${process.env.CLIENT_URL}/product/${op.productId._id}">${op.name}</a></td>
-            <td>${op.quantity}</td>
-            <td>₱${op.price}</td>
-            <td>₱${subtotal}</td>
-          </tr>
-        `;
-
         const stock = stocks.find(
           (stock) => stock.productId.toString() === op.productId._id.toString()
         );
@@ -744,6 +969,28 @@ const returnOrder = asyncHandler(
     }
   }
 );
+
+const getOrderTableAndTotal = (
+  orderProducts: IOrderProductDocument[]
+): { total: number; tableHtml: string } => {
+  let total = 0;
+  let tableHtml = "";
+
+  for (const op of orderProducts) {
+    const subtotal = op.price * op.quantity;
+    total += subtotal;
+    tableHtml += `
+        <tr>
+          <td><a href="${process.env.CLIENT_URL}/product/${op.productId._id}">${op.name}</a></td>
+          <td>${op.quantity}</td>
+          <td>₱${op.price}</td>
+          <td>₱${subtotal}</td>
+        </tr>
+      `;
+  }
+
+  return { total, tableHtml };
+};
 
 export {
   getMyOrders,
