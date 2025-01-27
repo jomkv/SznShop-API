@@ -19,8 +19,6 @@ const searchProducts = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { search, category, size, ratings, price, inStock } = req.query;
 
-    console.log(req.query);
-
     const query: any = {};
 
     if (search) {
