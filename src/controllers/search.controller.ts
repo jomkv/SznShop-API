@@ -19,7 +19,9 @@ const searchProducts = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { search, category, size, ratings, price, inStock } = req.query;
 
-    const query: any = {};
+    const query: any = {
+      active: true,
+    };
 
     if (search) {
       query.name = { $regex: search, $options: "i" }; // case insensitive search
