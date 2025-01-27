@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { IProductDocument, Size } from "../@types/product.types";
+import { IProductDocument, Size, allowedSizes } from "../@types/product.types";
 import { findCartItemOrError, findProductOrError } from "../utils/findOrError";
 
 // * Models
@@ -10,8 +10,6 @@ import CartProduct from "../models/CartProduct";
 import BadRequestError from "../errors/BadRequestError";
 import AuthenticationError from "../errors/AuthenticationError";
 import DatabaseError from "../errors/DatabaseError";
-
-const allowedSizes: Size[] = ["xs", "sm", "md", "lg", "xl", "xxl"];
 
 // @desc    Add product to cart, or update quantity
 // @route   POST /api/cart/:id

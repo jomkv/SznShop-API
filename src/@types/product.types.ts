@@ -65,3 +65,5 @@ export interface IStocksInput {
   xl: number;
   xxl: number;
 }
+
+export const allowedSizes: Size[] = ["xs", "sm", "md", "lg", "xl", "xxl"];
