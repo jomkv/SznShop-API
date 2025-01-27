@@ -659,6 +659,10 @@ const cancelOrder = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const order = req.order as IOrderDocument;
 
+    if (order.status === "SHIPPING") {
+      throw new BadRequestError("Order already shipping");
+    }
+
     order.status = "CANCELLED";
     order.timestamps.cancelledAt = new Date();
 
