@@ -6,7 +6,7 @@ import {
   IStocksInput,
   Size,
 } from "../@types/product.types";
-import mongoose from "mongoose";
+import mongoose, { startSession } from "mongoose";
 import { deleteImages, uploadImages } from "../utils/cloudinaryHelper";
 import { findProductOrError, findStocksOrError } from "../utils/findOrError";
 import { IImage } from "../@types/image.types";
@@ -82,7 +82,7 @@ const editProduct = asyncHandler(
     const files = req.files as Express.Multer.File[] | undefined;
     const isImageChanged = req.body.isImageChange === "true";
 
-    active = active ? active : true; // default to true if active not given
+    active = active !== undefined ? active : true; // default to true if active not given
 
     // save old images to delete for later
     const oldImages: IImage[] = product.images;
@@ -99,15 +99,26 @@ const editProduct = asyncHandler(
     product.active = active;
     product.images = images;
 
+    const session = await startSession();
+    session.startTransaction();
+
     try {
-      await product.save();
+      await product.save({ session });
+
+      // If product not active, remove from user's carts
+      if ((active as any) === "false") {
+        await CartProduct.deleteMany({ productId: product.id }, { session });
+      }
 
       if (files && files.length > 0 && isImageChanged) {
         await deleteImages(oldImages);
       }
 
+      await session.commitTransaction();
+
       res.status(200).json({ message: "Product updated", product });
     } catch (error) {
+      await session.abortTransaction();
       throw new DatabaseError();
     }
   }
