@@ -26,11 +26,10 @@ const loginDev = asyncHandler(
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET as string,
-      { expiresIn: "1h" }
     );
     res.cookie("x-auth-cookie", token);
     res.status(200).json({ message: "Logged in" });
-  }
+  },
 );
 
 // @desc    Logout of account, clear cookies
@@ -43,7 +42,7 @@ const logout = asyncHandler(
     });
 
     res.status(200).json({ message: "Logged out successfully" });
-  }
+  },
 );
 
 // @desc    Redirect user after login with auth cookie
@@ -61,7 +60,7 @@ const handleRedirect = asyncHandler(
       process.env.JWT_SECRET as string,
       {
         expiresIn: "15d",
-      }
+      },
     );
 
     const clientUrl = process.env.CLIENT_URL as string;
@@ -70,10 +69,10 @@ const handleRedirect = asyncHandler(
 
     res.cookie("x-auth-cookie", token, {
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
     });
     res.redirect(redirectUrl);
-  }
+  },
 );
 
 // @desc    Get current user
@@ -90,7 +89,7 @@ const getMe = asyncHandler(
     }
 
     res.status(200).json({ user });
-  }
+  },
 );
 
 export { loginDev, handleRedirect, getMe, logout };
