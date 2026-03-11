@@ -30,7 +30,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // * Middlewares
-app.use(cors({ origin: true, credentials: true }));
+app.set("trust proxy", 1);
+app.use(
+  cors({ origin: "https://szn-shop-client.vercel.app/", credentials: true }),
+);
 app.use(express.urlencoded({ extended: false })); // allow destructuring of req.body
 app.use(express.json());
 app.use(cookieParser());

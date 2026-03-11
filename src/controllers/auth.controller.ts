@@ -70,6 +70,7 @@ const handleRedirect = asyncHandler(
     res.cookie("x-auth-cookie", token, {
       secure: process.env.NODE_ENV === "production",
       sameSite: "none",
+      httpOnly: true,
     });
     res.redirect(redirectUrl);
   },
