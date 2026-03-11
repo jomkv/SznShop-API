@@ -31,7 +31,7 @@ const port = process.env.PORT || 3000;
 
 // * Middlewares
 app.set("trust proxy", 1);
-app.use(cors({ origin: "*", credentials: true }));
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.urlencoded({ extended: false })); // allow destructuring of req.body
 app.use(express.json());
 app.use(cookieParser());
