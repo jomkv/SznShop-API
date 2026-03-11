@@ -41,7 +41,6 @@ const logout = asyncHandler(
       expires: new Date(0),
       secure: process.env.NODE_ENV === "production",
       sameSite: "none",
-      httpOnly: true,
     });
 
     res.status(200).json({ message: "Logged out successfully" });
@@ -73,7 +72,6 @@ const handleRedirect = asyncHandler(
     res.cookie("x-auth-cookie", token, {
       secure: process.env.NODE_ENV === "production",
       sameSite: "none",
-      httpOnly: true,
     });
     res.redirect(redirectUrl);
   },
