@@ -40,6 +40,9 @@ googleStrategy(passport);
 app.use(passport.initialize());
 
 // * Routes
+app.get("/", (req: Request, res: Response) => {
+  res.status(200).json("Welcome :D");
+});
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/category", categoryRoutes);
@@ -55,7 +58,7 @@ app.all(
   "*",
   asyncHandler(() => {
     throw new Error("This endpoint does not exist");
-  })
+  }),
 );
 
 app.use(errorHandler);
