@@ -41,6 +41,8 @@ const logout = asyncHandler(
       expires: new Date(0),
       secure: process.env.NODE_ENV === "production",
       sameSite: "none",
+      path: "/",
+      domain: ".jomkv.me",
     });
 
     res.status(200).json({ message: "Logged out successfully" });
@@ -61,7 +63,7 @@ const handleRedirect = asyncHandler(
       },
       process.env.JWT_SECRET as string,
       {
-        expiresIn: "15d",
+        expiresIn: "30d",
       },
     );
 
@@ -72,6 +74,9 @@ const handleRedirect = asyncHandler(
     res.cookie("x-auth-cookie", token, {
       secure: process.env.NODE_ENV === "production",
       sameSite: "none",
+      path: "/",
+      domain: ".jomkv.me",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
     res.redirect(redirectUrl);
   },
