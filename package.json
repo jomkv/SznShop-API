@@ -4,8 +4,10 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
+    "build": "npm install && tsc && tsc-alias",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "start": "node build/server.js"
   },
   "author": "Jom Karlo Verzosa",
   "license": "MIT",
@@ -21,6 +23,7 @@
     "express-async-handler": "^1.2.0",
     "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
+    "mongodb": "^7.1.0",
     "mongoose": "^8.7.1",
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
