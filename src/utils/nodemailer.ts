@@ -12,21 +12,22 @@ const transporter = nodemailer.createTransport({
 const sendEmail = async (
   recipientEmail: string,
   subject: string,
-  htmlContent: string
+  htmlContent: string,
 ): Promise<void> => {
-  const mailDetails: SendMailOptions = {
-    from: process.env.NODEMAILER_USER,
-    to: recipientEmail,
-    subject,
-    text: "",
-    html: htmlContent,
-  };
+  // const mailDetails: SendMailOptions = {
+  //   from: process.env.NODEMAILER_USER,
+  //   to: recipientEmail,
+  //   subject,
+  //   text: "",
+  //   html: htmlContent,
+  // };
 
-  try {
-    await transporter.sendMail(mailDetails);
-  } catch (error) {
-    // Do nothing
-  }
+  // try {
+  //   await transporter.sendMail(mailDetails);
+  // } catch (error) {
+  //   // Do nothing
+  // }
+  return;
 };
 
 export default sendEmail;
