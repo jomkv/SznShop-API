@@ -39,6 +39,9 @@ const logout = asyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     res.cookie("x-auth-cookie", "", {
       expires: new Date(0),
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      httpOnly: true,
     });
 
     res.status(200).json({ message: "Logged out successfully" });
